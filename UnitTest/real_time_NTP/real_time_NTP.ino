@@ -20,7 +20,7 @@ const int   daylightOffset_sec = 3600;
 
 void setup(){
   Serial.begin(115200);
-  wm.resetSettings();
+  //wm.resetSettings();
   bool res = false;
   //while(!res)
     res = wm.autoConnect("NightLightIOT");
