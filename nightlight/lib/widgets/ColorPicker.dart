@@ -101,8 +101,8 @@ class _CircleColorPickerState extends State<CircleColorPicker>
               _hueController.value = hue * 180 / pi;
             },
           ),
-          Text("Light\nColor", style: TextStyle(
-            fontSize: 30,fontWeight: FontWeight.w500
+          Text("Color", style: TextStyle(
+            fontSize: 35,fontWeight: FontWeight.bold
           ),),
           AnimatedBuilder(
             animation: _hueController,
