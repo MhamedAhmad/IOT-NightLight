@@ -119,15 +119,31 @@ class _MyHomePageState extends State<MyHomePage> {
     stopScan();
   }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
   final List<String> entries = ['Time Settings', 'Light Color','Light Intensity', 'WiFi Settings'/*,'Connect'*/];
   final List<IconData> icons = [Icons.access_time, Icons.lightbulb,Icons.brightness_6, Icons.wifi/*, Icons.bluetooth*/];
   final List<int> colorCodes = [600, 600,600, 600,600];
 
+
+  void _onColorChanged(Color color) {
+    setState(() => widget._currentColor = color);
+  }
+
+  void _showTimePicker(bool setStart) {
+    showTimePicker(
+      context: context,
+      initialTime: setStart? (widget._startTime ?? TimeOfDay.now()) : (widget._endTime ?? TimeOfDay.now()),
+    ).then((value) {
+      setState(() {
+        if(value != null)
+          {
+            if(setStart)
+              widget._startTime = value!;
+            else
+              widget._endTime = value!;
+          }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
