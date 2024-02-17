@@ -17,7 +17,7 @@ class _LightColorPageState extends State<LightColorPage> {
 
   void _onColorChanged(Color color) {
     setState(() => widget._currentColor = color);
-    var data = '${widget._currentColor.red+widget._currentColor.green+widget._currentColor.blue}';
+    var data = '${widget._currentColor.red}+${widget._currentColor.green}+${widget._currentColor.blue}';
     writeDataWithCharacteristic(widget.c_uid,data);
   }
   Widget build(BuildContext context) {
