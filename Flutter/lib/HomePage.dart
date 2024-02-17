@@ -12,7 +12,6 @@ import 'TimeSettingsPage.dart';
 import 'WIFISettingsPage.dart';
 import 'BTConnect.dart';
 
-
 Map<String, BluetoothCharacteristic?> characteristicDictionary = {};
 
 class MyHomePage extends StatefulWidget {
@@ -52,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void initState() {
     super.initState();
-    //startScan();
+    startScan();
   }
 
   startScan() {
@@ -101,16 +100,16 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     List<BluetoothService> services = await targetDevice.discoverServices();
-    services.forEach((service) {
+    for (var service in services) {
       if (service.uuid.toString() == SERVICE_UUID) {
-        service.characteristics.forEach((characteristics) {
-          characteristicDictionary[service.uuid.toString()]=characteristics;
+        for (var characteristics in service.characteristics) {
+          characteristicDictionary[characteristics.uuid.toString()]=characteristics;
             setState(() {
               connectionText = "All Ready with ${targetDevice.name}";
             });
-        });
+        }
       }
-    });
+    }
   }
 
   @override
@@ -123,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<IconData> icons = [Icons.access_time, Icons.lightbulb,Icons.brightness_6, Icons.wifi/*, Icons.bluetooth*/];
   final List<int> colorCodes = [600, 600,600, 600,600];
 
-
+/*
   void _onColorChanged(Color color) {
     setState(() => widget._currentColor = color);
   }
@@ -144,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     });
   }
-
+*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
