@@ -105,7 +105,8 @@ class _LightIntensityPageState extends State<LightIntensityPage> {
             ),
             SizedBox(height: 50,),
             ElevatedButton(onPressed: () {
-              var data = '${widget.standbyValue+widget.motionDetectionValue+widget.brightnessOff}';
+              var data = '${widget.standbyValue}+${widget.brightnessOff
+              }+${widget.motionDetectionValue}';
               writeDataWithCharacteristic(widget.c_uid,data);
             }, style: ElevatedButton.styleFrom(
             primary: Colors.orange
