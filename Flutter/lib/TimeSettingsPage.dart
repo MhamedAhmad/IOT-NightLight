@@ -200,8 +200,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             ElevatedButton(onPressed: () {
               var start = widget._startTime ?? TimeOfDay.now();
               var end = widget._endTime ?? TimeOfDay.now();
-              var data = '${start.hour+start.minute + end.hour+end.minute
-                  + widget.riseTime+widget.fadeTime + widget.delayTime}';
+              var data = '${start.hour}+${start.minute}+${end.hour}+${end.minute
+              }+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
               writeDataWithCharacteristic(widget.c_uid,data);
             }, style: ElevatedButton.styleFrom(
             primary: Colors.orange, // Change this to the color you want
