@@ -89,7 +89,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               height: 30,
             ),
             ElevatedButton(onPressed: () {
-              var data = '${widget.ssid+widget.password}';
+              var data = '${widget.ssid}+${widget.password}';
               writeDataWithCharacteristic(widget.c_uid,data);
             }, style: ElevatedButton.styleFrom(
             primary: Colors.orange,),
