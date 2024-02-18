@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'HomePage.dart';
 
 class TimeSettingsPage extends StatefulWidget {
-  TimeSettingsPage(String time_uuid, {Key? key});
+  TimeSettingsPage(this.c_uid, {Key? key});
   late String c_uid;
   TimeOfDay? _startTime = null;
   TimeOfDay? _endTime = null;
