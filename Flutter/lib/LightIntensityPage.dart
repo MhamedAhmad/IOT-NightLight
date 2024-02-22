@@ -5,9 +5,9 @@ import 'HomePage.dart';
 class LightIntensityPage extends StatefulWidget {
   LightIntensityPage(this.c_uid, {super.key});
   late String c_uid;
-  double motionDetectionValue = 1;
-  double standbyValue = 1;
-  double brightnessOff = 1;
+  double motionDetectionValue = 0;
+  double standbyValue = 0;
+  double brightnessOff = 0;
 
   @override
   State<LightIntensityPage> createState() => _LightIntensityPageState();
