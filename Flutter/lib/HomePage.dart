@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void initState() {
     super.initState();
-    //startScan();
+    startScan();
   }
 
   startScan() {
@@ -105,9 +105,9 @@ class _MyHomePageState extends State<MyHomePage> {
       if (service.uuid.toString() == SERVICE_UUID) {
         for (var characteristics in service.characteristics) {
           characteristicDictionary[characteristics.uuid.toString()]=characteristics;
-          setState(() {
-            connectionText = "All Ready with ${targetDevice.name}";
-          });
+            setState(() {
+              connectionText = "All Ready with ${targetDevice.name}";
+            });
         }
       }
     }

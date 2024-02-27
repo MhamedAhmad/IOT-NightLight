@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'HomePage.dart';
 
 class TimeSettingsPage extends StatefulWidget {
-  TimeSettingsPage(String time_uuid, {Key? key});
+  TimeSettingsPage(this.c_uid, {Key? key});
   late String c_uid;
   TimeOfDay? _startTime = null;
   TimeOfDay? _endTime = null;
@@ -214,22 +214,15 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             SizedBox(
               height: 30,
             ),
-            ElevatedButton(
-              onPressed: () {
-                var start = widget._startTime ?? TimeOfDay.now();
-                var end = widget._endTime ?? TimeOfDay.now();
-
-                  // Proceed to apply changes
-                  var data =
-                      '${start.hour}+${start.minute}+${end.hour}+${end.minute}+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
-                  writeDataWithCharacteristic(widget.c_uid, data);
-
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Colors.orange,
-              ),
-              child: Text('Save Changes'),
-            ),
+            ElevatedButton(onPressed: () {
+              var start = widget._startTime ?? TimeOfDay.now();
+              var end = widget._endTime ?? TimeOfDay.now();
+              var data = '${start.hour}+${start.minute}+${end.hour}+${end.minute
+              }+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
+              writeDataWithCharacteristic(widget.c_uid,data);
+            }, style: ElevatedButton.styleFrom(
+            primary: Colors.orange, // Change this to the color you want
+            ),child: Text('Apply Changes'))
           ],
         ),
       ),
