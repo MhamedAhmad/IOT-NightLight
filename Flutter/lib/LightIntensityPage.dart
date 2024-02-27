@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:nightlight/widgets/ColorPicker.dart';
+import 'package:nightlight/ColorPicker.dart';
 import 'HomePage.dart';
 
 class LightIntensityPage extends StatefulWidget {
   LightIntensityPage(this.c_uid, {super.key});
   late String c_uid;
-  double motionDetectionValue = 1;
-  double standbyValue = 1;
-  double brightnessOff = 1;
+  double motionDetectionValue = 0;
+
 
   @override
   State<LightIntensityPage> createState() => _LightIntensityPageState();
@@ -34,28 +33,11 @@ class _LightIntensityPageState extends State<LightIntensityPage> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Standby Mode',
-                  style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
-                ),
-                Slider(
-                  value: widget.standbyValue,
-                  onChanged: (value) {
-                    setState(() {
-                      widget.standbyValue = value;
-                    });
-                  },
-                  min: 0,
-                  max: 200,
-                  divisions: 20,
-                  label: widget.standbyValue.round().toString(),
-                ),
-              ],
+            Divider(
+              height: 100,
+              color: Colors.orange,
+              thickness: 2,
             ),
-           SizedBox(height: 50,),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -77,39 +59,13 @@ class _LightIntensityPageState extends State<LightIntensityPage> {
                 ),
               ],
             ),
-            Divider(
-              height: 100,
-              color: Colors.orange,
-              thickness: 2,
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Brightness OFF',
-                  style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
-                ),
-                Slider(
-                  value: widget.brightnessOff,
-                  onChanged: (value) {
-                    setState(() {
-                      widget.brightnessOff = value;
-                    });
-                  },
-                  min: 0,
-                  max: 200,
-                  divisions: 20,
-                  label: widget.brightnessOff.round().toString(),
-                ),
-              ],
-            ),
             SizedBox(height: 50,),
             ElevatedButton(onPressed: () {
-              var data = '${widget.standbyValue+widget.motionDetectionValue+widget.brightnessOff}';
+              var data = '${widget.motionDetectionValue}';
               writeDataWithCharacteristic(widget.c_uid,data);
             }, style: ElevatedButton.styleFrom(
-            primary: Colors.orange
-            ), child: Text('Apply Changes'))
+                backgroundColor: Colors.orange
+            ), child: Text('Save Changes'))
           ],
         ),
 

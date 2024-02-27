@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-//import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import 'HomePage.dart';
 
+/*
 class DeviceScreen extends StatelessWidget {
   const DeviceScreen({Key? key, required this.device}) : super(key: key);
 
@@ -33,8 +34,7 @@ class DeviceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
-    /*return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(device.name),
         actions: <Widget>[
@@ -116,35 +116,64 @@ class DeviceScreen extends StatelessWidget {
           ],
         ),
       ),
-    );*/
+    );
   }
 }
-
+*/
 
 class FindDevicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    BluetoothDevice aa;
-    /*return Scaffold(
-        backgroundColor: Colors.teal.shade50,
+    return Scaffold(
         appBar: AppBar(
-          title: Text('WIFI Settings'),
+          centerTitle: true,
+          //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          backgroundColor: Colors.teal,
+          title: Text('Night Light',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              )),
         ),
+        backgroundColor: Colors.teal.shade50,
         body:SingleChildScrollView(
           child: Column(
+            children:[
+                Text(
+                  'Please Choose ESP32',
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+                SizedBox(height: 8),
+
+          Column(
             children: <Widget>[
               StreamBuilder<List<ScanResult>>(
-                stream: FlutterBluePlus.scanResults,
+                stream: FlutterBlue.instance.scanResults,
                 initialData: [],
                 builder: (c, snapshot) => Column(
                   children: snapshot.data!
                       .map((result) => ListTile(
                       title: Text(result.device.name == "" ? "Not relevant " : result.device.name),
                       subtitle: Text(result.device.id.toString()),
-                      onTap: ()  {
-                        result.device.connect();
+                      onTap: ()  async {
+                        await result.device.connect();
+                        List<BluetoothService> services = await result.device.discoverServices();
+                        var SERVICE_UUID = "cfdfdee4-a53c-47f4-a4f1-9854017f3817";
+                        for (var service in services) {
+                          if (service.uuid.toString() == SERVICE_UUID) {
+                            for (var characteristics in service.characteristics) {
+                              characteristicDictionary[characteristics.uuid.toString()]=characteristics;
+                            }
+                          }
+                        }
+
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(title: 'Night Light'),
+                          ),
+                        );
+
                         //Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                        //result.device.connect();
                         //return DeviceScreen(device: result.device);
                         //}));
                       }),
@@ -153,89 +182,7 @@ class FindDevicesScreen extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ));*/
-    return Scaffold(
-      backgroundColor: Colors.teal.shade50,
-      appBar: AppBar(
-        title: Text('WIFI Settings'),
-      ),
-        body:SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          StreamBuilder<List<ScanResult>>(
-            stream: FlutterBlue.instance.scanResults,
-            initialData: [],
-            builder: (c, snapshot) => Column(
-              children: snapshot.data!
-                  .map((result) => ListTile(
-                title: Text(result.device.name == "" ? "Not relevant " : result.device.name),
-                subtitle: Text(result.device.id.toString()),
-                onTap: ()  {
-                  result.device.connect();
-                  //Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-    //result.device.connect();
-    //return DeviceScreen(device: result.device);
-    //}));
-                }),
-              )
-                  .toList(),
-            ),
-          ),
-        ],
-      ),
-    ));
+          ),]),
+        ));
   }
 }
-/*
-class FlutterBlueApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: StreamBuilder<BluetoothState>(
-            stream: FlutterBlue.instance.state,
-            initialData: BluetoothState.unknown,
-            builder: (c, snapshot) {
-              final state = snapshot.data;
-              if (state == BluetoothState.on) {
-                return FindDevicesScreen();
-              }
-              return BluetoothOffScreen(state: state);
-            })
-    );
-  }
-}
-
-class BluetoothOffScreen extends StatelessWidget {
-  const BluetoothOffScreen({Key? key, this.state}) : super(key: key);
-
-  final BluetoothState? state;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.lightBlue,
-      appBar: AppBar(
-        //automaticallyImplyLeading: false,
-        title: const Text('Error',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.w300)),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.bluetooth_disabled,
-              size: 200.0,
-              color: Colors.white54,
-            ),
-            Text(
-              'Bluetooth/Location Adapter is ${state != null ? state.toString().substring(15) : 'not available'}.',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}*/

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:nightlight/widgets/ColorPicker.dart';
+import 'package:nightlight/ColorPicker.dart';
+import 'package:nightlight/SeekWifiMessage.dart';
 import 'HomePage.dart';
 
 class WIFISettingsPage extends StatefulWidget {
@@ -37,33 +38,6 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Password',
-                  style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  width: 250.0, // Set the desired width
-                  child: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        widget.password = value;
-                      });
-                      // Update the userSSID variable when the text changes
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0), // Adjust internal padding
-                    ),
-                    obscureText: true, // Hide entered characters
-
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30,),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
                   'SSID',
                   style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
                 ),
@@ -88,12 +62,42 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
             SizedBox(
               height: 30,
             ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Password',
+                  style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  width: 250.0, // Set the desired width
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        widget.password = value;
+                      });
+                      // Update the userSSID variable when the text changes
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0), // Adjust internal padding
+                    ),
+                    obscureText: true, // Hide entered characters
+
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 30,
+            ),
             ElevatedButton(onPressed: () {
-              var data = '${widget.ssid+widget.password}';
+              var data = '${widget.ssid}+${widget.password}';
               writeDataWithCharacteristic(widget.c_uid,data);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SeekWifiMessage()));
             }, style: ElevatedButton.styleFrom(
-            primary: Colors.orange,),
-          child: Text('Apply Changes'))
+              primary: Colors.orange,),
+                child: Text('Save Changes'))
           ],
         ),
       ),

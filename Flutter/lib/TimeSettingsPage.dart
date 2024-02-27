@@ -32,6 +32,19 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       });
     });
   }
+  int calculateTimeDifferenceInMinutes(
+      TimeOfDay? startTime,
+      TimeOfDay? endTime,
+      ) {
+
+    if (startTime != null && endTime != null) {
+
+      int startMinutes = startTime.hour * 60 + startTime.minute;
+      int endMinutes = endTime.hour * 60 + endTime.minute;
+      return endMinutes - startMinutes;
+    }
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +61,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               fontWeight: FontWeight.bold,
             )),
       ),
-      
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -159,8 +172,10 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                           widget.riseTime = newValue!;
                         });
                       },
-                      items: List.generate(11, (index) {
-                        return DropdownMenuItem<int>(
+                      items: List.generate(
+                          calculateTimeDifferenceInMinutes(widget._startTime, widget._endTime) + 1,
+                              (index) {
+                            return DropdownMenuItem<int>(
                           value: index,
                           child: Text(index.toString()),
                         );
@@ -183,7 +198,9 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                           widget.fadeTime = newValue!;
                         });
                       },
-                      items: List.generate(11, (index) {
+                      items: List.generate(
+                          calculateTimeDifferenceInMinutes(widget._endTime,widget._startTime) + 1,
+                          (index) {
                         return DropdownMenuItem<int>(
                           value: index,
                           child: Text(index.toString()),
@@ -197,15 +214,22 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             SizedBox(
               height: 30,
             ),
-            ElevatedButton(onPressed: () {
-              var start = widget._startTime ?? TimeOfDay.now();
-              var end = widget._endTime ?? TimeOfDay.now();
-              var data = '${start.hour+start.minute + end.hour+end.minute
-                  + widget.riseTime+widget.fadeTime + widget.delayTime}';
-              writeDataWithCharacteristic(widget.c_uid,data);
-            }, style: ElevatedButton.styleFrom(
-            primary: Colors.orange, // Change this to the color you want
-            ),child: Text('Apply Changes'))
+            ElevatedButton(
+              onPressed: () {
+                var start = widget._startTime ?? TimeOfDay.now();
+                var end = widget._endTime ?? TimeOfDay.now();
+
+                  // Proceed to apply changes
+                  var data =
+                      '${start.hour}+${start.minute}+${end.hour}+${end.minute}+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
+                  writeDataWithCharacteristic(widget.c_uid, data);
+
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.orange,
+              ),
+              child: Text('Save Changes'),
+            ),
           ],
         ),
       ),
