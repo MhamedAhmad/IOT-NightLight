@@ -43,8 +43,8 @@ class StartPage extends StatelessWidget {
                 return MyHomePage(title: 'Night light');
               }
             }
-            //return BluetoothButtonPage();
-            return MyHomePage(title: 'Night light');
+            return BluetoothButtonPage();
+            //return MyHomePage(title: 'Night light');
           }
         }
       );

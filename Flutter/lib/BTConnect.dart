@@ -138,51 +138,52 @@ class FindDevicesScreen extends StatelessWidget {
         backgroundColor: Colors.teal.shade50,
         body:SingleChildScrollView(
           child: Column(
-            children:[
+              children:[
                 Text(
                   'Please Choose ESP32',
                   style: TextStyle(fontSize: 20, color: Colors.black),
                 ),
                 SizedBox(height: 8),
 
-          Column(
-            children: <Widget>[
-              StreamBuilder<List<ScanResult>>(
-                stream: FlutterBlue.instance.scanResults,
-                initialData: [],
-                builder: (c, snapshot) => Column(
-                  children: snapshot.data!
-                      .map((result) => ListTile(
-                      title: Text(result.device.name == "" ? "Not relevant " : result.device.name),
-                      subtitle: Text(result.device.id.toString()),
-                      onTap: ()  async {
-                        await result.device.connect();
-                        List<BluetoothService> services = await result.device.discoverServices();
-                        var SERVICE_UUID = "cfdfdee4-a53c-47f4-a4f1-9854017f3817";
-                        for (var service in services) {
-                          if (service.uuid.toString() == SERVICE_UUID) {
-                            for (var characteristics in service.characteristics) {
-                              characteristicDictionary[characteristics.uuid.toString()]=characteristics;
-                            }
-                          }
-                        }
+                Column(
+                  children: <Widget>[
+                    StreamBuilder<List<ScanResult>>(
+                      stream: FlutterBlue.instance.scanResults,
+                      initialData: [],
+                      builder: (c, snapshot) => Column(
+                        children: snapshot.data!
+                            .where((result) => result.device.name.isNotEmpty)
+                            .map((result) => ListTile(
+                            title: Text(/*result.device.name == "" ? "Not relevant " : */ result.device.name),
+                            subtitle: Text(result.device.id.toString()),
+                            onTap: ()  async {
+                              await result.device.connect();
+                              List<BluetoothService> services = await result.device.discoverServices();
+                              var SERVICE_UUID = "cfdfdee4-a53c-47f4-a4f1-9854017f3817";
+                              for (var service in services) {
+                                if (service.uuid.toString() == SERVICE_UUID) {
+                                  for (var characteristics in service.characteristics) {
+                                    characteristicDictionary[characteristics.uuid.toString()]=characteristics;
+                                  }
+                                }
+                              }
 
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => MyHomePage(title: 'Night Light'),
-                          ),
-                        );
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => MyHomePage(title: 'Night Light'),
+                                ),
+                              );
 
-                        //Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                        //return DeviceScreen(device: result.device);
-                        //}));
-                      }),
-                  )
-                      .toList(),
-                ),
-              ),
-            ],
-          ),]),
+                              //Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                              //return DeviceScreen(device: result.device);
+                              //}));
+                            }),
+                        )
+                            .toList(),
+                      ),
+                    ),
+                  ],
+                ),]),
         ));
   }
 }

@@ -15,7 +15,7 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.teal,
+      backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.teal,

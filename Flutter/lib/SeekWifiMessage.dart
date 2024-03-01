@@ -1,6 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:synchronized/extension.dart';
 import 'HomePage.dart';
+import 'package:synchronized/synchronized.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+
+
 
 class SeekWifiMessage extends StatefulWidget {
 
@@ -14,29 +21,38 @@ class _SeekWifiMessageState extends State<SeekWifiMessage> {
 
 
   Future<int> receiveDataFromESP() async {
-    // Your Bluetooth logic using flutter_blue to receive data from ESP
-    try {
-      // Replace the following with your actual logic
-      //FlutterBlue flutterBlue = FlutterBlue.instance;
-     // BluetoothDevice device = (await flutterBlue.connectedDevices).first;
-      //Guid characteristicUuid = Guid("placeholder");
-
       BluetoothCharacteristic? ch=characteristicDictionary[WIFI_SIGNAL_UUID];
       if (ch == null) {
         return -1;
       }
 
-      /* BluetoothCharacteristic charcteristic =
-      await device.characteristics.firstWhere(
-            (char) => char.uuid == characteristicUuid,
-      );*/
+      int x=-1;
+      try{
+        await ch.setNotifyValue(true);
+      }
+      catch(err){
+        x=-1;
+      }
+      ch.value.listen((value) {
+        if(value.isNotEmpty) {
+          x=value[0];
+        }
+      });
+      await Future.delayed(const Duration(milliseconds:500));
+      if(x==-1){
+        return await receiveDataFromESP();
+      }
+      return x;
 
+    /*
+      await Future.delayed(const Duration(seconds:8));
       List<int>? value = await ch.read();
-      return value.isNotEmpty ? value[0] : -1; // Assuming received data is a single byte
-    } catch (e) {
-      print("Error receiving data: $e");
-      return -1;
-    }
+      List<int>? value = await ch.read();
+      return value[0];
+      */
+
+
+
   }
 
   @override
@@ -60,7 +76,7 @@ class _SeekWifiMessageState extends State<SeekWifiMessage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return CircularProgressIndicator();
             } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
+              return Text('${snapshot.error}');
             } else {
               int receivedData = snapshot.data as int;
               if (receivedData == 0) {

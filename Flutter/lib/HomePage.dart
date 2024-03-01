@@ -51,8 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
   String connectionText = "";
 
   void initState() {
-    super.initState();
-    startScan();
+   // super.initState();
+    //startScan();
   }
 
   startScan() {

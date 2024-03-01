@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'HomePage.dart';
+import 'dart:developer';
+
 
 class TimeSettingsPage extends StatefulWidget {
   TimeSettingsPage(this.c_uid, {Key? key});
   late String c_uid;
-  TimeOfDay? _startTime = null;
-  TimeOfDay? _endTime = null;
+  TimeOfDay? _startTime = TimeOfDay.now();
+  TimeOfDay? _endTime = TimeOfDay.now();
   int delayTime = 0;
   int riseTime = 0;
   int fadeTime = 0;
+
 
   @override
   State<TimeSettingsPage> createState() => _TimeSettingsPageState();
@@ -32,18 +35,34 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       });
     });
   }
-  int calculateTimeDifferenceInMinutes(
-      TimeOfDay? startTime,
-      TimeOfDay? endTime,
-      ) {
+  int limitRTime() {
+    // Convert string times to DateTime objects
+    if(widget._startTime==null || widget._endTime==null) return 0;
+    int startTimeInMinutes = widget._startTime!.hour * 60 + widget._startTime!.minute;
+    int endTimeInMinutes = widget._endTime!.hour * 60 + widget._endTime!.minute;
 
-    if (startTime != null && endTime != null) {
 
-      int startMinutes = startTime.hour * 60 + startTime.minute;
-      int endMinutes = endTime.hour * 60 + endTime.minute;
-      return endMinutes - startMinutes;
-    }
-    return 0;
+    // Calculate available time for the light to be on
+    int availableTime = (startTimeInMinutes > endTimeInMinutes)
+        ? 24 * 60 - (startTimeInMinutes - endTimeInMinutes)
+        : endTimeInMinutes - startTimeInMinutes;
+
+    // Calculate maximum allowed rise time and fade time (capped at 10 minutes)
+    return availableTime.clamp(0, 10);
+  }
+  int limitFTime() {
+    // Convert string times to DateTime objects
+    if(widget._startTime==null || widget._endTime==null) return 0;
+    int startTimeInMinutes = widget._startTime!.hour * 60 + widget._startTime!.minute;
+    int endTimeInMinutes = widget._endTime!.hour * 60 + widget._endTime!.minute;
+
+    // Calculate available time for the light to be on
+    int availableTime = (startTimeInMinutes > endTimeInMinutes)
+        ? (startTimeInMinutes - endTimeInMinutes)
+        : 24 * 60 - (startTimeInMinutes - endTimeInMinutes);
+
+    // Calculate maximum allowed rise time and fade time (capped at 10 minutes)
+    return availableTime.clamp(0, 10);
   }
 
   @override
@@ -173,7 +192,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                         });
                       },
                       items: List.generate(
-                          calculateTimeDifferenceInMinutes(widget._startTime, widget._endTime) + 1,
+                          limitRTime()+1,
                               (index) {
                             return DropdownMenuItem<int>(
                           value: index,
@@ -199,7 +218,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                         });
                       },
                       items: List.generate(
-                          calculateTimeDifferenceInMinutes(widget._endTime,widget._startTime) + 1,
+                          limitFTime()+1,
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,

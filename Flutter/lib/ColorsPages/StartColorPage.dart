@@ -31,7 +31,7 @@ class StartColorPageState extends State<StartColorPage> {
   void ApplyColor(bool save) {
     print('hi');
     HSVColor hsvDecode = HSVColor.fromColor(widget._currentColor);
-    var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save? '0' : '1'}';
+    var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save? '1' : '0'}';
     writeDataWithCharacteristic(widget.c_uid,data);
   }
 
