@@ -15,13 +15,13 @@ class EndColorPage extends StatefulWidget {
 
 
   @override
-  State<EndColorPage> createState() => StartColorPageState();
+  State<EndColorPage> createState() => EndColorPageState();
 }
 
 
 
 
-class StartColorPageState extends State<EndColorPage> {
+class EndColorPageState extends State<EndColorPage> {
 
   static const String COLOR_MODE_UUID = "c78ed52c-7a26-49ab-ba3c-c4133568a8f2";
 
