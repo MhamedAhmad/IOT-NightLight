@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:synchronized/extension.dart';
 import 'HomePage.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+
+import 'NavigateToBluetooth.dart';
 
 
 
@@ -31,6 +34,9 @@ class _SeekWifiMessageState extends State<SeekWifiMessage> {
         await ch.setNotifyValue(true);
       }
       catch(err){
+        if(err.toString().contains("no instance of BluetoothGatt")) {
+          return -100;
+        }
         x=-1;
       }
       ch.value.listen((value) {
@@ -83,8 +89,13 @@ class _SeekWifiMessageState extends State<SeekWifiMessage> {
                 return Text('Faild To Connect \nPlease Try Again');
               } else if (receivedData == 1) {
                 return Text('Connected Successfully');
-              }
+              } else if(receivedData == -100){
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => BluetoothButtonPage()));
               return Container();
+              }
+              else
+                return Container();
 
 
             }

@@ -238,7 +238,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               var end = widget._endTime ?? TimeOfDay.now();
               var data = '${start.hour}+${start.minute}+${end.hour}+${end.minute
               }+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
-              writeDataWithCharacteristic(widget.c_uid,data);
+              writeDataWithCharacteristic(widget.c_uid,data,context);
             }, style: ElevatedButton.styleFrom(
             primary: Colors.orange, // Change this to the color you want
             ),child: Text('Apply Changes'))

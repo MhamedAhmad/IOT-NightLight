@@ -62,7 +62,7 @@ class _LightIntensityPageState extends State<LightIntensityPage> {
             SizedBox(height: 50,),
             ElevatedButton(onPressed: () {
               var data = '${widget.motionDetectionValue}';
-              writeDataWithCharacteristic(widget.c_uid,data);
+              writeDataWithCharacteristic(widget.c_uid,data,context);
             }, style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange
             ), child: Text('Save Changes'))

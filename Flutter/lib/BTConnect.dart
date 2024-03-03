@@ -167,7 +167,7 @@ class FindDevicesScreen extends StatelessWidget {
                                   }
                                 }
                               }
-
+                              FlutterBlue.instance.stopScan();
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) => MyHomePage(title: 'Night Light'),

@@ -8,6 +8,7 @@ import 'package:flutter_blue/flutter_blue.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'ColorsPages/StartColorPage.dart';
 import 'ColorsPages/EndColorPage.dart';
+import 'NavigateToBluetooth.dart';
 import 'TimeSettingsPage.dart';
 import 'WIFISettingsPage.dart';
 import 'BTConnect.dart';
@@ -23,13 +24,43 @@ class MyHomePage extends StatefulWidget {
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-writeDataWithCharacteristic(String c, String data) async {
+writeDataWithCharacteristic(String c, String data, BuildContext context) async {
   BluetoothCharacteristic? bc=characteristicDictionary[c];
   if (bc == null)
     return;
 
   List<int> bytes = utf8.encode(data);
-  await bc.write(bytes);
+  try{
+    await bc.write(bytes);
+  }
+  catch(error)
+  {
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () { Navigator.of(context).pop();
+      targetDevice.disconnect();
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) =>BluetoothButtonPage())
+      );},
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Bluetooth Disconnected"),
+      content: Text("Connect to Bluetooth again"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -154,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   case 1:
                     //print('hello');
                     var data = '${1}';
-                    writeDataWithCharacteristic(COLOR_MODE_UUID,data);
+                    writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => StartColorPage(START_COLOR_UUID)),
@@ -162,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     break;
                   case 2:
                     var data = '${1}';
-                    writeDataWithCharacteristic(COLOR_MODE_UUID,data);
+                    writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => EndColorPage(END_COLOR_UUID)),

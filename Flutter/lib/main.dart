@@ -26,7 +26,7 @@ class StartPage extends StatelessWidget {
   const StartPage({super.key}) ;
     @override
     Widget build(BuildContext context) {
-      return FutureBuilder<List<BluetoothDevice>>(
+      /*return FutureBuilder<List<BluetoothDevice>>(
         future: FlutterBlue.instance.connectedDevices,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -47,7 +47,8 @@ class StartPage extends StatelessWidget {
             //return MyHomePage(title: 'Night light');
           }
         }
-      );
+      );*/
+      return BluetoothButtonPage();
     }
   }
 

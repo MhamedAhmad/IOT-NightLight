@@ -28,11 +28,11 @@ class StartColorPageState extends State<StartColorPage> {
     setState(() => widget._currentColor = color);
   }
 
-  void ApplyColor(bool save) {
+  void ApplyColor(bool save, BuildContext context) {
     print('hi');
     HSVColor hsvDecode = HSVColor.fromColor(widget._currentColor);
     var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save? '1' : '0'}';
-    writeDataWithCharacteristic(widget.c_uid,data);
+    writeDataWithCharacteristic(widget.c_uid,data,context);
   }
 
 
@@ -55,7 +55,7 @@ class StartColorPageState extends State<StartColorPage> {
         canPop: true,
         onPopInvoked: (didPop) {
           var data = '${0}';
-          writeDataWithCharacteristic(COLOR_MODE_UUID,data);
+          writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
           //print('hi');
         },
         child: Center(
@@ -76,12 +76,12 @@ class StartColorPageState extends State<StartColorPage> {
                 height: 30,
               ),
               ElevatedButton(onPressed: () {
-                ApplyColor(false);
+                ApplyColor(false,context);
               }, style: ElevatedButton.styleFrom(
                 primary: Colors.orange,),
                   child: Text('Apply Changes')),
               ElevatedButton(onPressed: () {
-                ApplyColor(true);
+                ApplyColor(true,context);
               }, style: ElevatedButton.styleFrom(
                 primary: Colors.orange,),
                   child: Text('Save Changes'))

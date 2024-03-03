@@ -3,12 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
 import 'BTConnect.dart';
+import 'HomePage.dart';
+late BluetoothDevice targetDevice;
+late BluetoothCharacteristic targetCharacteristic;
+bool connected = false;
 
 class BluetoothButtonPage extends StatefulWidget {
   const BluetoothButtonPage({super.key});
-
   @override
   State<BluetoothButtonPage> createState() => _BluetoothButtonPageState();
+}
+connectToDevice() async {
+  if (targetDevice == null) {
+    return;
+  }
+  await targetDevice.connect(autoConnect: false);
+  discoverServices();
+}
+discoverServices() async {
+  if (targetDevice == null) {
+    return;
+  }
+
+  List<BluetoothService> services = await targetDevice.discoverServices();
+  for (var service in services) {
+    if (service.uuid.toString() == "cfdfdee4-a53c-47f4-a4f1-9854017f3817") {
+      for (var characteristics in service.characteristics) {
+        characteristicDictionary[characteristics.uuid.toString()]=characteristics;
+      }
+    }
+  }
+  connected = true;
 }
 
 class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
@@ -54,11 +79,38 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
                   ) ),
             ),
           ),
-          onTap: ()  {
-          FlutterBlue.instance.startScan(timeout: Duration(seconds: 4));
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => FindDevicesScreen()),
-          );
+          onTap: () async {
+            connected = false;
+            showDialog(context: context, builder: (context) {
+              return Center(child: CircularProgressIndicator());
+            },);
+            FlutterBlue BT = FlutterBlue.instance;
+            BT.scan(timeout: Duration(seconds: 5)).listen((scanResult) async {
+              if (scanResult.device.name.contains("ESP32")) {
+                targetDevice = scanResult.device;
+                await connectToDevice();
+              }
+            });
+            for(int i=0; i <10; i++)
+            {
+              await Future.delayed(const Duration(milliseconds:500));
+              if(connected)
+                {
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                  );
+                  return;
+                }
+            }
+            if (!connected) {
+              Navigator.of(context).pop();
+              targetDevice.disconnect();
+            }
+            else {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+              );
+            }
           }
           ,
         ),
