@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:nightlight/main.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 //import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -37,7 +38,7 @@ writeDataWithCharacteristic(String c, String data, BuildContext context) async {
   {
     Widget okButton = TextButton(
       child: Text("OK"),
-      onPressed: () { Navigator.of(context).pop();
+      onPressed: () { Navigator.of(context).pop();popup=false;
       targetDevice.disconnect();
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) =>BluetoothButtonPage())
@@ -54,6 +55,7 @@ writeDataWithCharacteristic(String c, String data, BuildContext context) async {
     );
 
     // show the dialog
+    popup = true;
     showDialog(
       context: context,
       builder: (BuildContext context) {

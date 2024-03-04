@@ -8,6 +8,7 @@ void main() {
   runApp(const MyApp());
 }
 */
+bool popup = false;
 void main() {
   runApp(
     MaterialApp(
@@ -22,9 +23,10 @@ void main() {
     ),
   );
 }
-class StartPage extends StatelessWidget {
+class StartPage extends StatefulWidget {
   const StartPage({super.key}) ;
     @override
+    _MyAppState createState() => _MyAppState();
     Widget build(BuildContext context) {
       /*return FutureBuilder<List<BluetoothDevice>>(
         future: FlutterBlue.instance.connectedDevices,
@@ -52,4 +54,60 @@ class StartPage extends StatelessWidget {
     }
   }
 
+class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+      // --
+        if(!connected && !inside && !popup) {
+          showDialog(context: context, builder: (context) {
+            return Center(child: CircularProgressIndicator());
+          },);
+          await targetDevice.connect(autoConnect: false);
+          await discoverServices();
+          Navigator.of(context).pop();
+          connected = true;
+        }
+        print('Resumed');
+        break;
+      case AppLifecycleState.inactive:
+      // --
+        print('Inactive');
+        break;
+      case AppLifecycleState.paused:
+      // --
+        await targetDevice.disconnect();
+        connected = false;
+        print('Paused');
+        break;
+      case AppLifecycleState.detached:
+      // --
+        print('Detached');
+        break;
+      case AppLifecycleState.hidden:
+      // A new **hidden** state has been introduced in latest flutter version
+        print('Hidden');
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BluetoothButtonPage();
+  }
+
+}

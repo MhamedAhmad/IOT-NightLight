@@ -7,6 +7,7 @@ import 'HomePage.dart';
 late BluetoothDevice targetDevice;
 late BluetoothCharacteristic targetCharacteristic;
 bool connected = false;
+bool inside = true;
 
 class BluetoothButtonPage extends StatefulWidget {
   const BluetoothButtonPage({super.key});
@@ -39,6 +40,8 @@ discoverServices() async {
 class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
   @override
   Widget build(BuildContext context) {
+    inside = true;
+    connected = false;
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
@@ -96,6 +99,7 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
               await Future.delayed(const Duration(milliseconds:500));
               if(connected)
                 {
+                  inside = false;
                   Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
                   );
@@ -107,6 +111,7 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
               targetDevice.disconnect();
             }
             else {
+              inside = false;
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
               );

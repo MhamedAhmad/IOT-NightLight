@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:nightlight/ColorPicker.dart';
 import 'package:nightlight/SeekWifiMessage.dart';
+import 'package:nightlight/main.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
 
@@ -191,7 +192,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                   // set up the button
                   Widget okButton = TextButton(
                     child: Text("OK"),
-                    onPressed: () { Navigator.of(context).pop();
+                    onPressed: () { Navigator.of(context).pop();popup=false;
                     targetDevice.disconnect();
                     Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) =>BluetoothButtonPage())
@@ -208,6 +209,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                   );
 
                   // show the dialog
+                popup = true;
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -221,7 +223,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                   // set up the button
                   Widget okButton = TextButton(
                     child: Text("OK"),
-                    onPressed: () {Navigator.of(context).pop();},
+                    onPressed: () {Navigator.of(context).pop();popup=false;},
                   );
 
                   // set up the AlertDialog
@@ -234,6 +236,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                   );
 
                   // show the dialog
+                popup = true;
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
