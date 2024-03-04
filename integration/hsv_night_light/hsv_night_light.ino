@@ -410,11 +410,19 @@ class CharacteristicCallBack: public BLECharacteristicCallbacks {
       color_page = (pChar->getValue() == "1");
   }
 };
+//
+
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onDisconnect(BLEServer* pServer) {
+      pServer->startAdvertising();
+    }
+};
 //starting BLE connection
 void BLEStart()
 {
   BLEDevice::init("ESP32");
   pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
   BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID), 30);
   pCharacteristic_1 = pService->createCharacteristic(
                       CHAR1_UUID,
