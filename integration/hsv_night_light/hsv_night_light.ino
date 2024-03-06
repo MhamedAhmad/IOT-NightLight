@@ -20,6 +20,8 @@
 bool configured = false;
 bool connecting = false;
 bool color_page = false;
+bool BT_connecting = false;
+std::string page = "0";
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
@@ -86,7 +88,8 @@ void handleColors(std::string colors, bool high)
   uint32_t rgbcolor = pixels.gamma32(pixels.ColorHSV(hue, sat, val));
   Serial.println(rgbcolor);
   pixels.fill(rgbcolor);
-  pixels.show();
+  if((high && page == "1") || (!high && page == "2"))
+    pixels.show();
   if(save == 0)
     return;
   if(high)
@@ -406,8 +409,25 @@ class CharacteristicCallBack: public BLECharacteristicCallbacks {
       handleColors(pChar->getValue(), false);
     else if((pChar->getUUID()).toString() == CHAR4_UUID)
       handleCycleTimes(pChar->getValue());
-    else if((pChar->getUUID()).toString() == CHAR6_UUID)
-      color_page = (pChar->getValue() == "1");
+    else if((pChar->getUUID()).toString() == CHAR6_UUID){
+      page = pChar->getValue();
+      color_page = (page != "0");
+      if(!color_page)
+        return;
+      int hue = high_hue;
+      int sat = high_saturation;
+      int val = high_value;
+      if(page == "2")
+      {
+        hue = low_hue;
+        sat = low_saturation;
+        val = low_value;
+      }
+      uint32_t rgbcolor = pixels.gamma32(pixels.ColorHSV(hue, sat, val));
+      Serial.println(rgbcolor);
+      pixels.fill(rgbcolor);
+      pixels.show();
+    }
   }
 };
 //
@@ -416,11 +436,14 @@ class MyServerCallbacks: public BLEServerCallbacks {
     void onDisconnect(BLEServer* pServer) {
       pServer->startAdvertising();
     }
+    void onConnect(BLEServer* pServer) {
+      BT_connecting = true;
+    }
 };
 //starting BLE connection
 void BLEStart()
 {
-  BLEDevice::init("ESP32");
+  BLEDevice::init("NightLightIOT");
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
   BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID), 30);
@@ -589,6 +612,18 @@ void setup(){
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 void loop(){
+  if(BT_connecting)
+  {
+    for(int i=0; i < 3; i++){
+        pixels.fill(6553600);
+        pixels.show();
+        delay(100);
+        pixels.clear();
+        pixels.show();
+        delay(100);
+      }
+    BT_connecting = false;
+  }
   delay(200);
   if(!color_page)
     detectMotion();
