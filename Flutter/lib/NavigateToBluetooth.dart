@@ -87,44 +87,46 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
                   ),
                 ),
                 onPressed: () async {
-                  connected = false;
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Center(child: CircularProgressIndicator());
-                    },
-                  );
-                  FlutterBlue BT = FlutterBlue.instance;
-                  BT.scan(timeout: Duration(seconds: 5)).listen((scanResult) async {
-                    if (scanResult.device.name.contains("ESP32")) {
-                      targetDevice = scanResult.device;
-                      initialized = true;
-                      await connectToDevice();
-                    }
-                  });
-                  for (int i = 0; i < 10; i++) {
-                    await Future.delayed(const Duration(milliseconds: 500));
-                    if (connected) {
-                      inside = false;
-                      BT.stopScan();
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),),
-                      );
-                      return;
-                    }
-                  }
-                  if (!connected) {
-                    if (!context.mounted) return;
-                    Navigator.of(context).pop();
-                    if (initialized) targetDevice.disconnect();
-                  } else {
-                    inside = false;
-                    BT.stopScan();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),),
-                    );
-                  }
-                },
+connected = false;
+            showDialog(context: context, builder: (context) {
+              return Center(child: CircularProgressIndicator());
+            },);
+            FlutterBlue BT = FlutterBlue.instance;
+            BT.scan(timeout: Duration(seconds: 5)).listen((scanResult) async {
+              if (scanResult.device.name.contains("NightLightIOT")) {
+                targetDevice = scanResult.device;
+                initialized = true;
+                await connectToDevice();
+              }
+            });
+            for(int i=0; i <10; i++)
+            {
+              await Future.delayed(const Duration(milliseconds:500));
+              if(connected)
+              {
+                inside = false;
+                BT.stopScan();
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                );
+                return;
+              }
+            }
+            if (!connected) {
+              if (!context.mounted) return;
+              Navigator.of(context).pop();
+              if(initialized)
+                targetDevice.disconnect();
+            }
+            else {
+              inside = false;
+              BT.stopScan();
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+              );
+            }
+          }
+          ,
                   child: Container(
                     child: Center(
                       child: Row(
@@ -154,17 +156,15 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
       },
     );
   }
-
-  Future<void> _onBackButtonPressed(BuildContext context) async {
-    bool exitApp = await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Closing App"),
-          content: const Text("Do you Want to close the app?"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
+  Future<void> _onBackButtonPressed(BuildContext context) async{
+    await showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Closing App"),
+            content: const Text("Do you Want to close the app?"),
+            actions: <Widget> [
+              TextButton(onPressed: (){
                 Navigator.of(context).pop();
               },
               child: const Text("No"),

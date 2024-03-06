@@ -99,33 +99,46 @@ class _MyHomePageState extends State<MyHomePage> {
     WIFISettingsPage(WIFI_UUID),
   ];
 
-  void _onItemTapped(int index) {
+  Future<void> _onItemTapped(int index) async {
     print('here');
     if ((_selectedIndex == 1 && index != 1)) {
       if(startSaved==false && startApplied==true) {
         print('snkfs');
         showWarningDialog('StartColorPage', index);
       }
-      var data = '${0}';
-      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+      if(index != 2){
+        var data = '${0}';
+        await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+      }
+      else
+      {
+        var data = '${2}';
+        await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+      }
     }else if((_selectedIndex == 2 && index != 2)){
       if(endSaved==false && endApplied==true) {
         showWarningDialog('EndColorPage', index);
       }
       print('here11');
       print('here11');
-
-      var data = '${0}';
-      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+      if(index != 1){
+        var data = '${0}';
+        await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+      }
+      else
+      {
+        var data = '${1}';
+        await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+      }
     }
-    if(index==1 || index==2){
-      var data = '${1}';
-      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+    else if(index == 1 || index == 2)
+    {
+      var data = '${index}';
+      await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
     }
       setState(() {
         _selectedIndex = index;
       });
-
   }
 
   void showWarningDialog(String pageName, int index) {
@@ -230,10 +243,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -246,8 +255,8 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Colors.teal.shade800,
             items: [
               TabItem(icon: Icons.access_time, title: 'Time'),
-              TabItem(icon: Icons.color_lens_outlined, title: 'StandBy'),
-              TabItem(icon: Icons.color_lens_rounded, title: 'End Color'),
+              TabItem(icon: Icons.sunny, title: 'StandBy'),
+              TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
               TabItem(icon: wifi_connected ? Icons.wifi : Icons.wifi_off,
                   title: 'WiFi'),
             ],

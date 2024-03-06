@@ -106,7 +106,7 @@ class EndColorPageState extends State<EndColorPage> {
 
   Widget build(BuildContext context) {
   return Scaffold(
-    backgroundColor: Colors.teal.shade50,
+    backgroundColor: Colors.white70,
     appBar: AppBar(
       centerTitle: true,
       backgroundColor: Colors.teal.shade800,

@@ -21,8 +21,8 @@ void main() {
         useMaterial3: true,
         fontFamily: 'Alef'
       ),
-        //home: MyHomePage(title: 'Night light'),
-     home: StartPage(),
+        //home: StartPage(),
+     home: MyHomePage(title: 'Night light')
     ),
   );
 }

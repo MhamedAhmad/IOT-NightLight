@@ -105,7 +105,7 @@ class StartColorPageState extends State<StartColorPage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.teal.shade50,
+      backgroundColor: Colors.white70,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Colors.teal.shade800,
@@ -118,14 +118,7 @@ class StartColorPageState extends State<StartColorPage> {
           ),
         ),
       ),
-      body: PopScope(
-        canPop: true,
-        onPopInvoked: (didPop) {
-          print('object');
-          var data = '${0}';
-          writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
-        },
-        child: Center(
+      body: Center(
           child: widget.isLoading
               ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -147,7 +140,7 @@ class StartColorPageState extends State<StartColorPage> {
                     'Please Choose the Start Color',
                     style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 20,),
+                  SizedBox(width: 10,),
                   IconButton(
                     icon: Icon(Icons.help),
                     onPressed: () {
@@ -196,7 +189,7 @@ class StartColorPageState extends State<StartColorPage> {
 
                 // set up the AlertDialog
                 AlertDialog alert = AlertDialog(
-                  title: Text("Day Color Settings Changed"),
+                  title: Text("Day Color Settings Changed",),
                   actions: [
                     okButton,
                   ],
@@ -220,7 +213,6 @@ class StartColorPageState extends State<StartColorPage> {
           ],
           ),
         ),
-      ),
     );
   }
 }
