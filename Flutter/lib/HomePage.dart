@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:nightlight/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 //import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -13,6 +14,9 @@ import 'NavigateToBluetooth.dart';
 import 'TimeSettingsPage.dart';
 import 'WIFISettingsPage.dart';
 import 'BTConnect.dart';
+import 'InstructionsPage.dart';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+
 
 Map<String, BluetoothCharacteristic?> characteristicDictionary = {};
 
@@ -83,169 +87,148 @@ class _MyHomePageState extends State<MyHomePage> {
   late BluetoothCharacteristic targetCharacteristic;
   String connectionText = "";
 
-  void initState() {
-   // super.initState();
-    //startScan();
-  }
+  int _selectedIndex = 0;
 
-  startScan() {
-    setState(() {
-      connectionText = "Start Scanning";
-    });
+  final List<Widget> _pages = [
+    TimeSettingsPage(TIME_UUID),
+    StartColorPage(START_COLOR_UUID),
+    EndColorPage(END_COLOR_UUID),
+    WIFISettingsPage(WIFI_UUID),
+  ];
 
-    scanSubscription = flutterBlue.scan().listen((scanResult) {
-      print(scanResult.device.name);
-      if (scanResult.device.name.contains(TARGET_DEVICE_NAME)) {
-        stopScan();
-
-        setState(() {
-          connectionText = "Found Target Device";
-        });
-
-        targetDevice = scanResult.device;
-        connectToDevice();
+  void _onItemTapped(int index) {
+    print('here');
+    if ((_selectedIndex == 1 && index != 1)) {
+      if(startSaved==false && startApplied==true) {
+        showWarningDialog('StartColorPage', index);
       }
-    }, onDone: () => stopScan());
-  }
-  stopScan() {
-    scanSubscription?.cancel();
-    scanSubscription = null;
-  }
-  connectToDevice() async {
-    if (targetDevice == null) {
-      return;
+      var data = '${0}';
+      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+    }else if((_selectedIndex == 2 && index != 2)){
+      if(endSaved==false && endApplied==true) {
+        showWarningDialog('EndColorPage', index);
+      }
+      print('here11');
+      print('here11');
+
+      var data = '${0}';
+      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
     }
-
-    setState(() {
-      connectionText = "Device Connecting";
-    });
-
-    await targetDevice.connect();
-
-    setState(() {
-      connectionText = "Device Connected";
-    });
-
-    discoverServices();
-  }
-  discoverServices() async {
-    if (targetDevice == null) {
-      return;
+    if(index==1 || index==2){
+      var data = '${1}';
+      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
     }
+      setState(() {
+        _selectedIndex = index;
+      });
 
-    List<BluetoothService> services = await targetDevice.discoverServices();
-    for (var service in services) {
-      if (service.uuid.toString() == SERVICE_UUID) {
-        for (var characteristics in service.characteristics) {
-          characteristicDictionary[characteristics.uuid.toString()]=characteristics;
-            setState(() {
-              connectionText = "All Ready with ${targetDevice.name}";
-            });
+  }
+
+  void showWarningDialog(String pageName,int index) {
+    Widget saveButton = TextButton(
+      child: Text("Save and Continue",),
+      onPressed: () {
+        if(pageName=='StartColorPage') {
+          startApplied=false;
+          startSaved=true;
+          saveStartChanges(true,context,START_COLOR_UUID,currentStartColor);
         }
-      }
-    }
+        else{
+          endApplied=false;
+          startApplied=true;
+          saveEndChanges(true,context,END_COLOR_UUID,motionDetectionValue,currentEndColor);
+        }
+        Navigator.of(context).pop();
+
+      },
+    );
+
+    Widget discardButton = TextButton(
+      child: Text("Discard Changes and Continue"),
+      onPressed: () {
+        if(pageName=='StartColorPage') {
+          startApplied=false;
+          startSaved=true;
+        }
+        else{
+          endApplied=false;
+          startApplied=true;
+        }
+
+        Navigator.of(context).pop();
+
+      },
+    );
+
+    AlertDialog alert = AlertDialog(
+      title: Text("Alert"),
+      content: Text("Do you want to save your changes before leaving?"),
+      actions: [
+        saveButton,
+        discardButton,
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    //stopScan();
+  Future<void> saveStartChanges(bool save,BuildContext context, String c_uid,Color color) async {
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setInt('startColor', color.value);
+
+      print('djs');
+      print(color);
+
+      HSVColor hsvDecode = HSVColor.fromColor(currentStartColor);
+      var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
+      writeDataWithCharacteristic(c_uid, data, context);
+
   }
 
-  final List<String> entries = ['Time Settings', 'Start Color','End Color', 'WiFi Settings'/*,'Connect'*/];
-  final List<IconData> icons = [Icons.access_time, Icons.color_lens_outlined,Icons.color_lens_rounded, Icons.wifi/*, Icons.bluetooth*/];
-  final List<int> colorCodes = [600, 600,600, 600,600];
+  Future<void> saveEndChanges(bool save,BuildContext context, String c_uid,double motionDetectionValue ,Color color) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('endColor', color.value);
+    prefs.setDouble('motionDetectionValue', motionDetectionValue);
+    print('ahc');
+    print(motionDetectionValue);
+
+    HSVColor hsvDecode = HSVColor.fromColor(currentEndColor);
+    var data =
+        '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}+${motionDetectionValue}';
+    writeDataWithCharacteristic(c_uid, data, context);
+
+  }
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        backgroundColor: Colors.teal,
-        title: Text(widget.title,
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            )),
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemCount: entries.length,
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-              onTap: () async {
-                // Handle the action for each menu item
-                switch (index) {
-                  case 0:
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TimeSettingsPage(TIME_UUID)),
-                    );
-                    break;
-                  case 1:
-                    //print('hello');
-                    var data = '${1}';
-                    writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => StartColorPage(START_COLOR_UUID)),
-                    );
-                    break;
-                  case 2:
-                    var data = '${1}';
-                    writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EndColorPage(END_COLOR_UUID)),
-                    );
-                    break;
-                  case 3:
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => WIFISettingsPage(WIFI_UUID)),
-                    );
-                    break;
-                /*case 4:
-                  FlutterBlue.instance.startScan(timeout: Duration(seconds: 4));
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => FindDevicesScreen()),
-                  );*/
-
-                  break;
-
-
-                }
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15.0),
-                child:
-                Container(
-                  height: 130,
-                  color: Colors.amber[colorCodes[index]],
-                  child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                      //leading: Icon(icons[index], color: Colors.teal,size: 40,)
-                      title:Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(icons[index], color: Colors.teal,size: 35,),
-                            SizedBox(width: 8),
-                            Text(
-                              entries[index],
-                              style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ) ),
-                ),
-              )
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-      ),    );
+    body: _pages[_selectedIndex],
+    bottomNavigationBar: ConvexAppBar(
+      style: TabStyle.reactCircle,
+      color: Colors.white,
+      backgroundColor: Colors.teal.shade800,
+      items: [
+       TabItem(icon: Icons.access_time, title: 'Time'),
+       TabItem(icon: Icons.color_lens_outlined, title: 'StandBy'),
+       TabItem(icon: Icons.color_lens_rounded, title: 'End Color'),
+       TabItem(icon: wifi_connected?Icons.wifi:Icons.wifi_off, title: 'WiFi'),
+      ],
+      onTap:_onItemTapped,
+    ),
+    );
   }
 }

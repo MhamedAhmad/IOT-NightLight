@@ -100,20 +100,27 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
               if(connected)
                 {
                   inside = false;
+                  if (!context.mounted) return;
                   Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                    MaterialPageRoute(
+                      builder: (context) => MyHomePage(title: 'Night Light'),
+                    ),
                   );
                   return;
                 }
             }
             if (!connected) {
+              if (!context.mounted) return;
               Navigator.of(context).pop();
               targetDevice.disconnect();
             }
             else {
               inside = false;
+              if (!context.mounted) return;
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                MaterialPageRoute(
+                  builder: (context) => MyHomePage(title: 'Night Light'),
+                ),
               );
             }
           }

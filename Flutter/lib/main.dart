@@ -17,9 +17,10 @@ void main() {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
+
       ),
-        //home: MyHomePage(title: 'Night light'),
-     home: StartPage(),
+        home: MyHomePage(title: 'Night light'),
+     //home: StartPage(),
     ),
   );
 }
@@ -50,7 +51,7 @@ class StartPage extends StatefulWidget {
           }
         }
       );*/
-      return BluetoothButtonPage();
+      return MyHomePage(title: 'Night light');
     }
   }
 

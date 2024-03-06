@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'HomePage.dart';
 import 'dart:developer';
+import 'package:google_fonts/google_fonts.dart';
+
 
 
 class TimeSettingsPage extends StatefulWidget {
@@ -73,11 +75,12 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       appBar: AppBar(
         centerTitle: true,
         //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.teal.shade800,
         title: Text('Night Light',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
+              color: Colors.white
             )),
       ),
 
@@ -96,7 +99,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     child: Text.rich(
                       TextSpan(
                         text: 'Start Time',
-                        style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Colors.black),
                         children: [
                           TextSpan(
                             text: "\n" +
@@ -124,7 +127,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     child: Text.rich(
                       TextSpan(
                         text: 'End Time',
-                        style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold, color: Colors.black),
+                        style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold, color: Colors.black),
                         children: [
                           TextSpan(
                             text: "\n" +
@@ -145,12 +148,12 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             ),
             Divider(
               height: 100,
-              color: Colors.orange,
+              color: Colors.teal.shade800,
               thickness: 2,
             ),
             Text(
               'Delay Time',
-              style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,fontFamily: 'Alef',),
             ),
             DropdownButton<int>(
               value: widget.delayTime,
@@ -168,7 +171,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             ),
             Divider(
               height: 100,
-              color: Colors.orange,
+              color: Colors.teal.shade800,
               thickness: 2,
             ),
             Row(
@@ -180,7 +183,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     Text(
                       'Rise Time',
                       style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 20,
                           color: Colors.black,
                           fontWeight: FontWeight.bold),
                     ),
@@ -208,7 +211,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     Text(
                       'Fade Time',
                       style: TextStyle(
-                          fontSize: 25, fontWeight: FontWeight.bold),
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     DropdownButton<int>(
                       value: widget.fadeTime,
@@ -240,8 +243,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               }+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
               writeDataWithCharacteristic(widget.c_uid,data,context);
             }, style: ElevatedButton.styleFrom(
-            primary: Colors.orange, // Change this to the color you want
-            ),child: Text('Apply Changes'))
+            backgroundColor: Colors.teal.shade800, // Change this to the color you want
+            ),child: Text('Apply Changes',style: TextStyle(color: Colors.white),))
           ],
         ),
       ),

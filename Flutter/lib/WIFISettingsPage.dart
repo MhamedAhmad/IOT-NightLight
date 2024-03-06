@@ -6,6 +6,9 @@ import 'package:nightlight/main.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
 
+bool wifi_connected=false;
+
+
 class WIFISettingsPage extends StatefulWidget {
   WIFISettingsPage(this.c_uid, {super.key});
   late String c_uid;
@@ -53,11 +56,12 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
       appBar: AppBar(
         centerTitle: true,
         //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.teal.shade800,
         title: Text('Night Light',
             style: TextStyle(
               fontSize: 30,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.bold, color: Colors.white
+
             )),
       ),
       body: Center(
@@ -70,7 +74,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               children: [
                 Text(
                   'SSID',
-                  style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   width: 250.0, // Set the desired width
@@ -98,7 +102,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               children: [
                 Text(
                   'Password',
-                  style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   width: 250.0, // Set the desired width
@@ -157,6 +161,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               }
               else if (x == 1)
               {
+                wifi_connected=true;
                 Navigator.of(context).pop();
                   // set up the button
                   Widget okButton = TextButton(
@@ -246,8 +251,8 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               }
               //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SeekWifiMessage()));
             }, style: ElevatedButton.styleFrom(
-              primary: Colors.orange,),
-                child: Text('Save Changes'))
+              backgroundColor: Colors.teal.shade800,),
+                child: Text('Save Changes',style: TextStyle(color: Colors.white),))
           ],
         ),
       ),

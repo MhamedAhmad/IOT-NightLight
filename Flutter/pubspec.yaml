@@ -40,6 +40,9 @@ dependencies:
   modal_progress_hud_nsn: ^0.5.1
   flutter_blue_plus: ^1.31.15
   synchronized: ^3.1.0+1
+  convex_bottom_bar: ^3.2.0
+  shared_preferences: ^2.2.2
+  google_fonts: ^6.2.1
   #flutter_blue_plus: ^1.31.13
   #flutter_reactive_ble: ^5.3.1
 
@@ -95,3 +98,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+fonts:
+  - family: Alef
+    fonts:
+      - asset: fonts/Alef-Bold.ttf
+      - asset: fonts/Alef-Regular.ttf
