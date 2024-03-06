@@ -79,6 +79,31 @@ class EndColorPageState extends State<EndColorPage> {
 
  */
 
+  void _showInstructions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Instructions"),
+          content: Text(
+            "1. Set the start and end times for the night light.\n"
+                "2. Adjust delay, rise time, and fade time as desired.\n"
+                "3. Click 'Apply Changes' to save the settings.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   Widget build(BuildContext context) {
   return Scaffold(
     backgroundColor: Colors.teal.shade50,
@@ -94,29 +119,43 @@ class EndColorPageState extends State<EndColorPage> {
         ),
       ),
     ),
-    body: SingleChildScrollView(
-      child: Column(
+    body:PopScope(
+    canPop: true,
+    onPopInvoked: (didPop) {
+      print('object');
+      var data = '${0}';
+      writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+    },
+    child: Center(
+      child: widget.isLoading
+          ? Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (widget.isLoading)
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          CircularProgressIndicator(),
+          SizedBox(height: 20),
+          Text(
+            widget.loadingMessage,
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
+      )
+          : Column(
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 20),
-                Text(
-                  widget.loadingMessage,
-                  style: TextStyle(fontSize: 16),
-                ),
-              ],
-            )
-          else
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(height: 15),
-                Text(
-                  'Please Choose the End Color',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Please Choose the End Color',
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 20,),
+                    IconButton(
+                      icon: Icon(Icons.help),
+                      onPressed: () {
+                        _showInstructions();
+                      },
+                    ),
+                  ],
                 ),
                 ColorPicker(
                   color: currentEndColor,
@@ -124,7 +163,7 @@ class EndColorPageState extends State<EndColorPage> {
                   initialPicker: Picker.paletteValue,
                 ),
                 Divider(
-                  height: 30,
+                  height: 15,
                   color: Colors.teal.shade800,
                   thickness: 2,
                 ),
@@ -144,6 +183,9 @@ class EndColorPageState extends State<EndColorPage> {
                   divisions: 20,
                   label: motionDetectionValue.round().toString(),
                 ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                 ElevatedButton(
                   onPressed: () {
                     endApplied = true;
@@ -155,6 +197,7 @@ class EndColorPageState extends State<EndColorPage> {
                   ),
                   child: Text('Apply Changes', style: TextStyle(color: Colors.white)),
                 ),
+                SizedBox(width: 8,),
                 ElevatedButton(
                   onPressed: () {
                     endApplied = false;
@@ -193,9 +236,10 @@ class EndColorPageState extends State<EndColorPage> {
                   child: Text('Save Changes', style: TextStyle(color: Colors.white)),
                 ),
                 SizedBox(height: 30),
+    ]
+                )
               ],
             ),
-        ],
       ),
     ),
   );

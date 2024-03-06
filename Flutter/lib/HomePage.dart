@@ -103,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print('here');
     if ((_selectedIndex == 1 && index != 1)) {
       if(startSaved==false && startApplied==true) {
+        print('snkfs');
         showWarningDialog('StartColorPage', index);
       }
       var data = '${0}';
@@ -127,44 +128,59 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
-  void showWarningDialog(String pageName,int index) {
+  void showWarningDialog(String pageName, int index) {
+    print('snflkd');
     Widget saveButton = TextButton(
-      child: Text("Save and Continue",),
+      child: Row(
+        children: [
+          Icon(Icons.save,color: Colors.green,), // Add an icon if you want
+          SizedBox(width: 8), // Add some space between the icon and text
+          Text(
+            "Save and Continue",
+            textAlign: TextAlign.left, // Align the text to the left
+          ),
+        ],
+      ),
       onPressed: () {
-        if(pageName=='StartColorPage') {
-          startApplied=false;
-          startSaved=true;
-          saveStartChanges(true,context,START_COLOR_UUID,currentStartColor);
-        }
-        else{
-          endApplied=false;
-          startApplied=true;
-          saveEndChanges(true,context,END_COLOR_UUID,motionDetectionValue,currentEndColor);
+        if (pageName == 'StartColorPage') {
+          startApplied = false;
+          startSaved = true;
+          saveStartChanges(true, context, START_COLOR_UUID, currentStartColor);
+        } else {
+          endApplied = false;
+          endSaved = true;
+          saveEndChanges(true, context, END_COLOR_UUID, motionDetectionValue, currentEndColor);
         }
         Navigator.of(context).pop();
-
       },
     );
 
     Widget discardButton = TextButton(
-      child: Text("Discard Changes and Continue"),
+      child: Row(
+        children: [
+          Icon(Icons.delete,color: Colors.red.shade800,), // Add an icon if you want
+          SizedBox(width: 8), // Add some space between the icon and text
+          Text(
+            "Discard Changes and Continue",
+            textAlign: TextAlign.left, // Align the text to the left
+          ),
+        ],
+      ),
       onPressed: () {
-        if(pageName=='StartColorPage') {
-          startApplied=false;
-          startSaved=true;
-        }
-        else{
-          endApplied=false;
-          startApplied=true;
+        if (pageName == 'StartColorPage') {
+          startApplied = false;
+          startSaved = true;
+        } else {
+          endApplied = false;
+          endSaved = true;
         }
 
         Navigator.of(context).pop();
-
       },
     );
 
     AlertDialog alert = AlertDialog(
-      title: Text("Alert"),
+      title: Text("Alert",),
       content: Text("Do you want to save your changes before leaving?"),
       actions: [
         saveButton,
@@ -172,13 +188,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
 
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
       },
     );
+
   }
+
 
   Future<void> saveStartChanges(bool save,BuildContext context, String c_uid,Color color) async {
 

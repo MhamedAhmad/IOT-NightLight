@@ -19,10 +19,10 @@ void main() {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
-
+        fontFamily: 'Alef'
       ),
-        home: MyHomePage(title: 'Night light'),
-     //home: StartPage(),
+        //home: MyHomePage(title: 'Night light'),
+     home: StartPage(),
     ),
   );
 }

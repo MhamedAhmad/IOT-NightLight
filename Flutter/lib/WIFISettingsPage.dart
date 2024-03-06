@@ -49,6 +49,31 @@ Future<int> receiveDataFromESP() async {
 
 class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
+  void _showInstructions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Instructions"),
+          content: Text(
+            "1. Set the start and end times for the night light.\n"
+                "2. Adjust delay, rise time, and fade time as desired.\n"
+                "3. Click 'Apply Changes' to save the settings.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,8 +92,19 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
       body: Center(
         child:
         Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.help),
+                  onPressed: () {
+                    _showInstructions();
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 200,),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -78,6 +78,31 @@ class StartColorPageState extends State<StartColorPage> {
   }
   */
 
+  void _showInstructions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Instructions"),
+          content: Text(
+            "1. Set the start and end times for the night light.\n"
+                "2. Adjust delay, rise time, and fade time as desired.\n"
+                "3. Click 'Apply Changes' to save the settings.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.teal.shade50,
@@ -115,17 +140,32 @@ class StartColorPageState extends State<StartColorPage> {
           )
               : Column(
             children: [
-              SizedBox(height: 15),
-              Text(
-                'Please Choose the Start Color',
-                style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Please Choose the Start Color',
+                    style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(width: 20,),
+                  IconButton(
+                    icon: Icon(Icons.help),
+                    onPressed: () {
+                      _showInstructions();
+                    },
+                  ),
+                ],
               ),
+
               ColorPicker(
                 color: currentStartColor,
                 onChanged: (value) => _onColorChanged(value),
                 initialPicker: Picker.paletteValue,
               ),
               SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
               ElevatedButton(
                 onPressed: () {
                   startApplied=true;
@@ -137,6 +177,7 @@ class StartColorPageState extends State<StartColorPage> {
                 ),
                 child: Text('Apply Changes',style: TextStyle(color:Colors.white)),
               ),
+              SizedBox(width: 8,),
               ElevatedButton(
                 onPressed: () {
                   startApplied=false;
@@ -175,6 +216,8 @@ class StartColorPageState extends State<StartColorPage> {
                 child: Text('Save Changes',style: TextStyle(color:Colors.white),),
               ),
             ],
+          ),
+          ],
           ),
         ),
       ),
