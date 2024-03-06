@@ -94,11 +94,41 @@ class StartColorPageState extends State<StartColorPage> {
         ),
       ),
       body: PopScope(
+<<<<<<< HEAD
         canPop: true,
         onPopInvoked: (didPop) {
           print('object');
           var data = '${0}';
           writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
+=======
+        canPop: false,
+        onPopInvoked: (didPop) async {
+          var data = '${0}';
+          await writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
+          await showDialog(
+              context: context,
+              builder: (BuildContext context){
+                return AlertDialog(
+                  title: const Text("Exiting Page"),
+                  content: const Text("Do you Want to Save changes?"),
+                  actions: <Widget> [
+                    TextButton(onPressed: (){
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                      );
+                    }, child: const Text("No")),
+                    TextButton(onPressed: (){
+                      ApplyColor(true, context);
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                      );
+                    }, child: const Text("Yes")),
+                  ],);
+              });
+          //print('hi');
+>>>>>>> 1823f09ade0edb9ea77b761241947c8f0846a18e
         },
         child: Center(
           child: widget.isLoading
@@ -111,6 +141,7 @@ class StartColorPageState extends State<StartColorPage> {
                 widget.loadingMessage,
                 style: TextStyle(fontSize: 16),
               ),
+<<<<<<< HEAD
             ],
           )
               : Column(
@@ -150,6 +181,44 @@ class StartColorPageState extends State<StartColorPage> {
                 child: Text('Save Changes',style: TextStyle(color:Colors.white),),
               ),
             ],
+=======
+              ElevatedButton(onPressed: () {
+                ApplyColor(false,context);
+              }, style: ElevatedButton.styleFrom(
+                primary: Colors.orange,),
+                  child: Text('Apply Changes')),
+              ElevatedButton(onPressed: () {
+                ApplyColor(true,context);
+                Widget okButton = TextButton(
+                  child: Text("OK"),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                    );
+                  },
+                );
+
+                // set up the AlertDialog
+                AlertDialog alert = AlertDialog(
+                  title: Text("Day Color Settings Changed"),
+                  actions: [
+                    okButton,
+                  ],
+                );
+
+                // show the dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                );
+              }, style: ElevatedButton.styleFrom(
+                primary: Colors.orange,),
+                  child: Text('Save Changes'))
+          ],
+>>>>>>> 1823f09ade0edb9ea77b761241947c8f0846a18e
           ),
         ),
       ),

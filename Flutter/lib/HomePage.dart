@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+//import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:nightlight/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -19,6 +21,7 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
 
 Map<String, BluetoothCharacteristic?> characteristicDictionary = {};
+bool exiting = false;
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title});
@@ -83,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   FlutterBlue flutterBlue = FlutterBlue.instance;
   late StreamSubscription<ScanResult>? scanSubscription;
-  late BluetoothDevice targetDevice;
+  //late BluetoothDevice targetDevice;
   late BluetoothCharacteristic targetCharacteristic;
   String connectionText = "";
 
@@ -214,21 +217,49 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-    body: _pages[_selectedIndex],
-    bottomNavigationBar: ConvexAppBar(
-      style: TabStyle.reactCircle,
-      color: Colors.white,
-      backgroundColor: Colors.teal.shade800,
-      items: [
-       TabItem(icon: Icons.access_time, title: 'Time'),
-       TabItem(icon: Icons.color_lens_outlined, title: 'StandBy'),
-       TabItem(icon: Icons.color_lens_rounded, title: 'End Color'),
-       TabItem(icon: wifi_connected?Icons.wifi:Icons.wifi_off, title: 'WiFi'),
-      ],
-      onTap:_onItemTapped,
-    ),
-    );
+    return PopScope(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: _pages[_selectedIndex],
+          bottomNavigationBar: ConvexAppBar(
+            style: TabStyle.reactCircle,
+            color: Colors.white,
+            backgroundColor: Colors.teal.shade800,
+            items: [
+              TabItem(icon: Icons.access_time, title: 'Time'),
+              TabItem(icon: Icons.color_lens_outlined, title: 'StandBy'),
+              TabItem(icon: Icons.color_lens_rounded, title: 'End Color'),
+              TabItem(icon: wifi_connected ? Icons.wifi : Icons.wifi_off,
+                  title: 'WiFi'),
+            ],
+            onTap: _onItemTapped,
+          ),
+        )
+        , canPop: false,
+        onPopInvoked: (bool didPop) {
+          if (didPop)
+            return;
+          _onBackButtonPressed(context);
+        });
   }
+
+    Future<void> _onBackButtonPressed(BuildContext context) async{
+      await showDialog(
+          context: context,
+          builder: (BuildContext context){
+            return AlertDialog(
+              title: const Text("Closing App"),
+              content: const Text("Do you Want to close the app?"),
+              actions: <Widget> [
+                TextButton(onPressed: (){
+                  Navigator.of(context).pop();
+                }, child: const Text("No")),
+                TextButton(onPressed: (){
+                  exiting = true;
+                  SystemNavigator.pop();
+                }, child: const Text("Yes")),
+              ],);
+          });
+    }
+
 }
