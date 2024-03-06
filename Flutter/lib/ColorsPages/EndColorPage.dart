@@ -54,10 +54,32 @@ class EndColorPageState extends State<EndColorPage> {
             )),
       ),
       body: PopScope(
-        canPop: true,
-        onPopInvoked: (didPop) {
+        canPop: false,
+        onPopInvoked: (didPop) async {
           var data = '${0}';
-          writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
+          await writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
+          await showDialog(
+            context: context,
+            builder: (BuildContext context){
+              return AlertDialog(
+            title: const Text("Exiting Page"),
+            content: const Text("Do you Want to Save changes?"),
+            actions: <Widget> [
+            TextButton(onPressed: (){
+            Navigator.of(context).pop();
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+            );
+            }, child: const Text("No")),
+            TextButton(onPressed: (){
+              ApplyColor(true, context);
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+              );
+            }, child: const Text("Yes")),
+            ],);
+            });
           //print('hi');
         },
         child: Center(
@@ -107,6 +129,32 @@ class EndColorPageState extends State<EndColorPage> {
                   child: Text('Apply Changes')),
               ElevatedButton(onPressed: () {
                 ApplyColor(true, context);
+                // set up the button
+                Widget okButton = TextButton(
+                  child: Text("OK"),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                    );
+                  },
+                );
+
+                // set up the AlertDialog
+                AlertDialog alert = AlertDialog(
+                  title: Text("Night Color Settings Changed"),
+                  actions: [
+                    okButton,
+                  ],
+                );
+
+                // show the dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                );
               }, style: ElevatedButton.styleFrom(
                 primary: Colors.orange,),
                   child: Text('Save Changes'))

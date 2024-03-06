@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'BTConnect.dart';
@@ -70,38 +72,58 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    switch (state) {
-      case AppLifecycleState.resumed:
-      // --
-        if(!connected && !inside && !popup) {
-          showDialog(context: context, builder: (context) {
-            return Center(child: CircularProgressIndicator());
-          },);
-          await targetDevice.connect(autoConnect: false);
-          await discoverServices();
-          Navigator.of(context).pop();
-          connected = true;
-        }
-        print('Resumed');
-        break;
-      case AppLifecycleState.inactive:
-      // --
-        print('Inactive');
-        break;
-      case AppLifecycleState.paused:
-      // --
+    if(exiting)
+    {
+      if(initialized)
         await targetDevice.disconnect();
-        connected = false;
-        print('Paused');
-        break;
-      case AppLifecycleState.detached:
-      // --
-        print('Detached');
-        break;
-      case AppLifecycleState.hidden:
-      // A new **hidden** state has been introduced in latest flutter version
-        print('Hidden');
-        break;
+      connected = false;
+      exiting = false;
+      print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+    }
+    else {
+      switch (state) {
+        case AppLifecycleState.resumed:
+        // --
+          print(connected);
+          print(inside);
+          print(popup);
+          if (!connected && !inside && !popup) {
+            showDialog(context: context, builder: (context) {
+              return Center(child: CircularProgressIndicator());
+            },);
+            await targetDevice.connect(autoConnect: true);
+            await discoverServices();
+            Navigator.of(context).pop();
+            connected = true;
+          }
+          print('Resumed');
+          break;
+        case AppLifecycleState.inactive:
+        // --
+          print('Inactive');
+          break;
+        case AppLifecycleState.paused:
+        // --
+          if (initialized)
+            await targetDevice.disconnect();
+          connected = false;
+          print('Paused');
+          break;
+        case AppLifecycleState.detached:
+        // --
+          if (initialized)
+            await targetDevice.disconnect();
+          connected = false;
+          print('Detached');
+          break;
+        case AppLifecycleState.hidden:
+        // A new **hidden** state has been introduced in latest flutter version
+          if (initialized)
+            await targetDevice.disconnect();
+          connected = false;
+          print('Hidden');
+          break;
+      }
     }
   }
 

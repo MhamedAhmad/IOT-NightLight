@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+//import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:nightlight/main.dart';
 //import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 //import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -15,6 +17,7 @@ import 'WIFISettingsPage.dart';
 import 'BTConnect.dart';
 
 Map<String, BluetoothCharacteristic?> characteristicDictionary = {};
+bool exiting = false;
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title});
@@ -79,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   FlutterBlue flutterBlue = FlutterBlue.instance;
   late StreamSubscription<ScanResult>? scanSubscription;
-  late BluetoothDevice targetDevice;
+  //late BluetoothDevice targetDevice;
   late BluetoothCharacteristic targetCharacteristic;
   String connectionText = "";
 
@@ -158,94 +161,122 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        backgroundColor: Colors.teal,
-        title: Text(widget.title,
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            )),
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemCount: entries.length,
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-              onTap: () async {
-                // Handle the action for each menu item
-                switch (index) {
-                  case 0:
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TimeSettingsPage(TIME_UUID)),
-                    );
-                    break;
-                  case 1:
-                    //print('hello');
-                    var data = '${1}';
-                    writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => StartColorPage(START_COLOR_UUID)),
-                    );
-                    break;
-                  case 2:
-                    var data = '${1}';
-                    writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EndColorPage(END_COLOR_UUID)),
-                    );
-                    break;
-                  case 3:
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => WIFISettingsPage(WIFI_UUID)),
-                    );
-                    break;
-                /*case 4:
+    return PopScope(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            backgroundColor: Colors.teal,
+            title: Text(widget.title,
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                )),
+          ),
+          body: ListView.separated(
+            padding: const EdgeInsets.all(8),
+            itemCount: entries.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                  onTap: () async {
+                    // Handle the action for each menu item
+                    switch (index) {
+                      case 0:
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TimeSettingsPage(TIME_UUID)),
+                        );
+                        break;
+                      case 1:
+                      //print('hello');
+                        var data = '${1}';
+                        writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => StartColorPage(START_COLOR_UUID)),
+                        );
+                        break;
+                      case 2:
+                        var data = '${1}';
+                        writeDataWithCharacteristic(COLOR_MODE_UUID,data,context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EndColorPage(END_COLOR_UUID)),
+                        );
+                        break;
+                      case 3:
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => WIFISettingsPage(WIFI_UUID)),
+                        );
+                        break;
+                        /*case 4:
                   FlutterBlue.instance.startScan(timeout: Duration(seconds: 4));
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => FindDevicesScreen()),
                   );*/
 
-                  break;
+                        break;
 
 
-                }
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15.0),
-                child:
-                Container(
-                  height: 130,
-                  color: Colors.amber[colorCodes[index]],
-                  child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                      //leading: Icon(icons[index], color: Colors.teal,size: 40,)
-                      title:Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(icons[index], color: Colors.teal,size: 35,),
-                            SizedBox(width: 8),
-                            Text(
-                              entries[index],
-                              style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),
+                    }
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15.0),
+                    child:
+                    Container(
+                      height: 130,
+                      color: Colors.amber[colorCodes[index]],
+                      child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                          //leading: Icon(icons[index], color: Colors.teal,size: 40,)
+                          title:Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(icons[index], color: Colors.teal,size: 35,),
+                                SizedBox(width: 8),
+                                Text(
+                                  entries[index],
+                                  style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ) ),
-                ),
-              )
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-      ),    );
+                          ) ),
+                    ),
+                  )
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) => const Divider(),
+          ),    )
+        , canPop: false,
+            onPopInvoked: (bool didPop)
+        {
+          if(didPop)
+            return;
+          _onBackButtonPressed(context);
+        });
   }
+
+ Future<void> _onBackButtonPressed(BuildContext context) async{
+    await showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Closing App"),
+            content: const Text("Do you Want to close the app?"),
+          actions: <Widget> [
+            TextButton(onPressed: (){
+              Navigator.of(context).pop();
+          }, child: const Text("No")),
+            TextButton(onPressed: (){
+              exiting = true;
+              SystemNavigator.pop();
+            }, child: const Text("Yes")),
+          ],);
+        });
+    }
 }

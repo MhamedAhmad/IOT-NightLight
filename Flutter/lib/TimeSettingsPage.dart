@@ -239,6 +239,31 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               var data = '${start.hour}+${start.minute}+${end.hour}+${end.minute
               }+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
               writeDataWithCharacteristic(widget.c_uid,data,context);
+              Widget okButton = TextButton(
+                child: Text("OK"),
+                onPressed: (){
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                  );
+                },
+              );
+
+              // set up the AlertDialog
+              AlertDialog alert = AlertDialog(
+                title: Text("Time Cycle Settings Changed"),
+                actions: [
+                  okButton,
+                ],
+              );
+
+              // show the dialog
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
             }, style: ElevatedButton.styleFrom(
             primary: Colors.orange, // Change this to the color you want
             ),child: Text('Apply Changes'))

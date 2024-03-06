@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 
 import 'BTConnect.dart';
@@ -8,6 +9,7 @@ late BluetoothDevice targetDevice;
 late BluetoothCharacteristic targetCharacteristic;
 bool connected = false;
 bool inside = true;
+bool initialized = false;
 
 class BluetoothButtonPage extends StatefulWidget {
   const BluetoothButtonPage({super.key});
@@ -18,7 +20,7 @@ connectToDevice() async {
   if (targetDevice == null) {
     return;
   }
-  await targetDevice.connect(autoConnect: false);
+  await targetDevice.connect(autoConnect: true);
   discoverServices();
 }
 discoverServices() async {
@@ -42,7 +44,8 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
   Widget build(BuildContext context) {
     inside = true;
     connected = false;
-    return Scaffold(
+    return PopScope(child:
+    Scaffold(
       backgroundColor: Colors.teal.shade50,
       appBar: AppBar(
         centerTitle: true,
@@ -91,6 +94,7 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
             BT.scan(timeout: Duration(seconds: 5)).listen((scanResult) async {
               if (scanResult.device.name.contains("ESP32")) {
                 targetDevice = scanResult.device;
+                initialized = true;
                 await connectToDevice();
               }
             });
@@ -98,22 +102,25 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
             {
               await Future.delayed(const Duration(milliseconds:500));
               if(connected)
-                {
-                  inside = false;
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
-                  );
-                  return;
-                }
+              {
+                inside = false;
+                BT.stopScan();
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                );
+                return;
+              }
             }
             if (!connected) {
               Navigator.of(context).pop();
-              targetDevice.disconnect();
+              if(initialized)
+                targetDevice.disconnect();
             }
             else {
               inside = false;
+              BT.stopScan();
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
+                  MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
               );
             }
           }
@@ -121,8 +128,32 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
+    ),canPop: false,
+        onPopInvoked: (bool didPop)
+        {
+          if(didPop)
+            return;
+          _onBackButtonPressed(context);
+        });
+  }
+  Future<void> _onBackButtonPressed(BuildContext context) async{
+    bool exitApp = await showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Closing App"),
+            content: const Text("Do you Want to close the app?"),
+            actions: <Widget> [
+              TextButton(onPressed: (){
+                Navigator.of(context).pop();
+              }, child: const Text("No")),
+              TextButton(onPressed: (){
+                if(initialized)
+                  targetDevice.disconnect();
+                SystemNavigator.pop();
+              }, child: const Text("Yes")),
+            ],);
+        });
   }
 }
-
 
