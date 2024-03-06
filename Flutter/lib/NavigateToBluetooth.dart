@@ -92,7 +92,7 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
             },);
             FlutterBlue BT = FlutterBlue.instance;
             BT.scan(timeout: Duration(seconds: 5)).listen((scanResult) async {
-              if (scanResult.device.name.contains("ESP32")) {
+              if (scanResult.device.name.contains("NightLightIOT")) {
                 targetDevice = scanResult.device;
                 initialized = true;
                 await connectToDevice();
@@ -138,7 +138,7 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
         });
   }
   Future<void> _onBackButtonPressed(BuildContext context) async{
-    bool exitApp = await showDialog(
+    await showDialog(
         context: context,
         builder: (BuildContext context){
           return AlertDialog(

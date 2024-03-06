@@ -93,14 +93,7 @@ class StartColorPageState extends State<StartColorPage> {
           ),
         ),
       ),
-      body: PopScope(
-        canPop: true,
-        onPopInvoked: (didPop) {
-          print('object');
-          var data = '${0}';
-          writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
-        },
-        child: Center(
+      body: Center(
           child: widget.isLoading
               ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +170,6 @@ class StartColorPageState extends State<StartColorPage> {
             ],
           ),
         ),
-      ),
     );
   }
 }

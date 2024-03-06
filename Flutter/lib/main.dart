@@ -21,7 +21,7 @@ void main() {
         useMaterial3: true,
 
       ),
-        home: MyHomePage(title: 'Night light'),
+        home: StartPage(),
      //home: StartPage(),
     ),
   );
