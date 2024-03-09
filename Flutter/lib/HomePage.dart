@@ -19,9 +19,10 @@ import 'BTConnect.dart';
 import 'InstructionsPage.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
-
 Map<String, BluetoothCharacteristic?> characteristicDictionary = {};
+StreamSubscription<List<int>>? stream;
 bool exiting = false;
+
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title});
@@ -81,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String WIFI_UUID = "006e3a0b-1a72-427b-8a00-9d03f029b9a9";
   static const String WIFI_SIGNAL_UUID = "be31c4e4-c3f7-4b6f-83b3-d9421988d355";
   static const String COLOR_MODE_UUID = "c78ed52c-7a26-49ab-ba3c-c4133568a8f2"; //todo: CHANGE THIS
+  static const String TIME_CONFIG = "6d6fb840-ed2b-438f-8375-9220a5164be8";
   static const String TARGET_DEVICE_NAME = "ESP32";
 
 
@@ -104,6 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if ((_selectedIndex == 1 && index != 1)) {
       if(startSaved==false && startApplied==true) {
         print('snkfs');
+        startApplied = false;
         showWarningDialog('StartColorPage', index);
       }
       if(index != 2){
@@ -117,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }else if((_selectedIndex == 2 && index != 2)){
       if(endSaved==false && endApplied==true) {
+        endApplied = false;
         showWarningDialog('EndColorPage', index);
       }
       print('here11');
@@ -254,8 +258,9 @@ class _MyHomePageState extends State<MyHomePage> {
             color: Colors.white,
             backgroundColor: Colors.teal.shade800,
             items: [
-              TabItem(icon: Icons.access_time, title: 'Time'),
-              TabItem(icon: Icons.sunny, title: 'StandBy'),
+              TabItem(icon: (configured||manually_configured) ? Icons.timer_outlined: Icons.timer_off_outlined,
+                  title: 'Time'),
+              TabItem(icon: Icons.sunny, title: 'Day Mode'),
               TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
               TabItem(icon: wifi_connected ? Icons.wifi : Icons.wifi_off,
                   title: 'WiFi'),

@@ -6,7 +6,6 @@ import 'package:nightlight/main.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
 
-bool wifi_connected=false;
 
 
 class WIFISettingsPage extends StatefulWidget {
@@ -14,13 +13,12 @@ class WIFISettingsPage extends StatefulWidget {
   late String c_uid;
   String password='';
   String ssid = '';
-
   @override
   State<WIFISettingsPage> createState() => _WIFISettingsPageState();
 }
 
-Future<int> receiveDataFromESP() async {
-  BluetoothCharacteristic? ch = characteristicDictionary["be31c4e4-c3f7-4b6f-83b3-d9421988d355"];
+Future<int> receiveDataFromESP(String UUID) async {
+  BluetoothCharacteristic? ch = characteristicDictionary[UUID];
   if (ch == null) {
     return -1;
   }
@@ -40,9 +38,10 @@ Future<int> receiveDataFromESP() async {
       x = value[0];
     }
   });
+  //print(x);
   await Future.delayed(const Duration(milliseconds: 500));
   if (x == -1) {
-    return await receiveDataFromESP();
+    return await receiveDataFromESP(UUID);
   }
   return x;
 }
@@ -56,9 +55,9 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
         return AlertDialog(
           title: Text("Instructions"),
           content: Text(
-            "1. Set the start and end times for the night light.\n"
-                "2. Adjust delay, rise time, and fade time as desired.\n"
-                "3. Click 'Apply Changes' to save the settings.",
+            "1. Enter WiFi Network Name and Password\n"
+                "2. Press on \"Connect to Wifi\" to connect\n"
+                "3. *If configuring Time fails a message will pop up that asks you if you want to configure it with the phone's time",
           ),
           actions: [
             TextButton(
@@ -80,6 +79,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
       backgroundColor: Colors.white70,
       appBar: AppBar(
         centerTitle: true,
+        automaticallyImplyLeading: false,
         //backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         backgroundColor: Colors.teal.shade800,
         title: Text('Night Light',
@@ -89,7 +89,9 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
             )),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
+          child: Center(
         child:
         Column(
           children: [
@@ -168,20 +170,64 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               showDialog(context: context, builder: (context) {
                 return Center(child: CircularProgressIndicator());
               },);
-              int x = await receiveDataFromESP();
+              int x = await receiveDataFromESP("be31c4e4-c3f7-4b6f-83b3-d9421988d355");
               if(x == 0)
+              {
+                Navigator.of(context).pop();
+                  // set up the button
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context){
+                      return AlertDialog(
+                        title: const Text("Connection Failed"),
+                        content: const Text("Do you Want to configure time with phone clock instead?"),
+                        actions: <Widget> [
+                          TextButton(onPressed: (){
+                            Navigator.of(context).pop();
+                          }, child: const Text("No")),
+                          TextButton(onPressed: (){
+                            var data = '${TimeOfDay.now().hour}+${TimeOfDay.now().minute}+${0},${DateTime.now().day}+${DateTime.now().month}+${DateTime.now().year}';
+                            writeDataWithCharacteristic("6d6fb840-ed2b-438f-8375-9220a5164be8", data, context);
+                            Navigator.of(context).pop();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Time Configured"),
+                                  content: Text(
+                                    "",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        manually_configured = true;
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text("OK"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }, child: const Text("Yes")),
+                        ],);
+                    });
+              }
+              else if (x == 1)
               {
                 Navigator.of(context).pop();
                   // set up the button
                   Widget okButton = TextButton(
                     child: Text("OK"),
-                    onPressed: (){ Navigator.of(context).pop();},
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
                   );
 
                   // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
                     title: Text("Connection Failed"),
-                    content: Text("Try Connecting again"),
+                    content: Text("Time is already configured"),
                     actions: [
                       okButton,
                     ],
@@ -195,37 +241,105 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                     },
                   );
               }
-              else if (x == 1)
+              else if(x == 2)
               {
-                wifi_connected=true;
+                wifi_connected = true;
                 Navigator.of(context).pop();
-                  // set up the button
-                  Widget okButton = TextButton(
-                    child: Text("OK"),
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
-                      );
-                    },
-                  );
-
-                  // set up the AlertDialog
-                  AlertDialog alert = AlertDialog(
-                    title: Text("Connection Succeeded"),
-                    content: Text("You can change the settings now"),
-                    actions: [
-                      okButton,
-                    ],
-                  );
-
-                  // show the dialog
-                  showDialog(
+                showDialog(
                     context: context,
-                    builder: (BuildContext context) {
-                      return alert;
-                    },
-                  );
+                    builder: (BuildContext context){
+                      return AlertDialog(
+                        title: const Text("Connection Succeeded but failed to configure time"),
+                        content: const Text("Do you Want to configure time with phone clock instead?"),
+                        actions: <Widget> [
+                          TextButton(onPressed: (){
+                            Navigator.of(context).pop();
+                          }, child: const Text("No")),
+                          TextButton(onPressed: (){
+                            var data = '${TimeOfDay.now().hour}+${TimeOfDay.now().minute}+${0},${DateTime.now().day}+${DateTime.now().month}+${DateTime.now().year}';
+                            writeDataWithCharacteristic("6d6fb840-ed2b-438f-8375-9220a5164be8", data, context);
+                            Navigator.of(context).pop();
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("Time Configured"),
+                                    content: Text(
+                                      "",
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          manually_configured = true;
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                          }, child: const Text("Yes")),
+                        ],);
+                    });
+              }
+              else if (x == 3)
+              {
+                wifi_connected = true;
+                configured = true;
+                Navigator.of(context).pop();
+                // set up the button
+                Widget okButton = TextButton(
+                  child: Text("OK"),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                );
+
+                // set up the AlertDialog
+                AlertDialog alert = AlertDialog(
+                  title: Text("Connection Succeeded"),
+                  content: Text("Time Configured"),
+                  actions: [
+                    okButton,
+                  ],
+                );
+
+                // show the dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                );
+              }
+              else if (x == 5)
+              {
+                Navigator.of(context).pop();
+                // set up the button
+                Widget okButton = TextButton(
+                  child: Text("OK"),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                );
+
+                // set up the AlertDialog
+                AlertDialog alert = AlertDialog(
+                  title: Text("Connection Failed"),
+                  content: Text("Time is already configured"),
+                  actions: [
+                    okButton,
+                  ],
+                );
+
+                // show the dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                );
               }
               else if(x == -100)
               {
@@ -288,14 +402,34 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SeekWifiMessage()));
             }, style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal.shade800,),
-                child: Text('Save Changes',style: TextStyle(color: Colors.white),))
+                child: Text('Connect to Wifi',style: TextStyle(color: Colors.white),))
           ],
         ),
-      ),
+      )),
     );
   }
 
-
+  void _configuredmessage() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Time Configured"),
+          content: Text(
+            "",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
 

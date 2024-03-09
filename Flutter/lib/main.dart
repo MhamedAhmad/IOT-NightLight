@@ -5,12 +5,14 @@ import 'package:flutter_blue/flutter_blue.dart';
 import 'BTConnect.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
+import 'WIFISettingsPage.dart';
 /*
 void main() {
   runApp(const MyApp());
 }
 */
 bool popup = false;
+bool escaped = false;
 void main() {
   runApp(
     MaterialApp(
@@ -78,7 +80,7 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
         await targetDevice.disconnect();
       connected = false;
       exiting = false;
-      print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+      print("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
     }
     else {
       switch (state) {
@@ -87,14 +89,26 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
           print(connected);
           print(inside);
           print(popup);
-          if (!connected && !inside && !popup) {
+          print(escaped);
+          if (!connected && !inside && !popup && !escaped) {
             showDialog(context: context, builder: (context) {
               return Center(child: CircularProgressIndicator());
             },);
+            bool this_connected = false;
+            Future.delayed(const Duration(milliseconds: 5000), () async {
+              if(!this_connected) {
+                escaped = true;
+                Navigator.of(context).pop();
+              }
+            });
             await targetDevice.connect(autoConnect: true);
             await discoverServices();
-            Navigator.of(context).pop();
             connected = true;
+            this_connected = true;
+            if(!escaped)
+              Navigator.of(context).pop();
+            else
+              escaped = false;
           }
           print('Resumed');
           break;
@@ -104,21 +118,21 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
           break;
         case AppLifecycleState.paused:
         // --
-          if (initialized)
+          if (initialized && connected)
             await targetDevice.disconnect();
           connected = false;
           print('Paused');
           break;
         case AppLifecycleState.detached:
         // --
-          if (initialized)
+          if (initialized && connected)
             await targetDevice.disconnect();
           connected = false;
           print('Detached');
           break;
         case AppLifecycleState.hidden:
         // A new **hidden** state has been introduced in latest flutter version
-          if (initialized)
+          if (initialized && connected)
             await targetDevice.disconnect();
           connected = false;
           print('Hidden');

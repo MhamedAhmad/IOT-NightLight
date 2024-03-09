@@ -46,8 +46,8 @@ class StartColorPageState extends State<StartColorPage> {
     _loadColor(); // Load the saved color when the page is initialized.
   }
 
-  void _onColorChanged(Color color) {
-    setState(() => currentStartColor = color);
+  void _onColorChanged(HSVColor color) {
+    setState(() => currentStartColor = color.toColor());
   }
 
   void _loadColor() async {
@@ -85,9 +85,11 @@ class StartColorPageState extends State<StartColorPage> {
         return AlertDialog(
           title: Text("Instructions"),
           content: Text(
-            "1. Set the start and end times for the night light.\n"
-                "2. Adjust delay, rise time, and fade time as desired.\n"
-                "3. Click 'Apply Changes' to save the settings.",
+            "1. Pick a color from the box\n"
+                "2. Change the brightness by using the slider below\n"
+                "3. Press 'Apply Changes' to see the selected color on the lights\n"
+                "4. Press 'Save Changes' if you want to change the lights to the selected color\n\n"
+              "*Color can be viewed at the top left corner even without applying but could be inaccurate",
           ),
           actions: [
             TextButton(
@@ -108,6 +110,7 @@ class StartColorPageState extends State<StartColorPage> {
       backgroundColor: Colors.white70,
       appBar: AppBar(
         centerTitle: true,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.teal.shade800,
         title: Text(
           'Night Light',
@@ -118,7 +121,9 @@ class StartColorPageState extends State<StartColorPage> {
           ),
         ),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+    child: Center(
           child: widget.isLoading
               ? Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -137,8 +142,8 @@ class StartColorPageState extends State<StartColorPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    'Please Choose the Start Color',
-                    style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                    'Please Choose Day Mode Color',
+                    style: TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
                   ),
                   SizedBox(width: 10,),
                   IconButton(
@@ -149,11 +154,10 @@ class StartColorPageState extends State<StartColorPage> {
                   ),
                 ],
               ),
-
-              ColorPicker(
-                color: currentStartColor,
+              _buildHead(),
+              PaletteValuePicker(
+                color: HSVColor.fromColor(currentStartColor),
                 onChanged: (value) => _onColorChanged(value),
-                initialPicker: Picker.paletteValue,
               ),
               SizedBox(height: 30),
               Row(
@@ -212,7 +216,48 @@ class StartColorPageState extends State<StartColorPage> {
           ),
           ],
           ),
-        ),
+        )),
     );
   }
+}
+
+Widget _buildHead() {
+  return SizedBox(
+    height: 50,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Avator
+        Container(
+          width: 32,
+          height: 32,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.fromBorderSide(
+              BorderSide(color: Colors.black26),
+            ),
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: const Border.fromBorderSide(
+                BorderSide(color: Colors.white, width: 3),
+              ),
+              color: currentStartColor,
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 22),
+
+        // HexPicker
+        Expanded(
+          child: HexPicker(
+            color: currentStartColor,
+            onChanged: (Color value) => {},
+          ),
+        )
+      ],
+    ),
+  );
 }

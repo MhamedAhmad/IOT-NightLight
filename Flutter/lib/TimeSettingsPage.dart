@@ -112,9 +112,9 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         return AlertDialog(
           title: Text("Instructions"),
           content: Text(
-            "1. Set the start and end times for the night light.\n"
-                "2. Adjust delay, rise time, and fade time as desired.\n"
-                "3. Click 'Apply Changes' to save the settings.",
+            "1. Set sleep and wake up times for the night light.\n"
+                "2. Set motion delay time, rise time, and fade time (in minutes) as desired.\n"
+                "3. Press 'Apply Changes' to save the settings.",
           ),
           actions: [
             TextButton(
@@ -135,6 +135,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       backgroundColor: Colors.white70,
       appBar: AppBar(
         centerTitle: true,
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.teal.shade800,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +151,9 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
           ],
         ),
       ),
-      body: Center(
+      body: SingleChildScrollView(
+    physics: BouncingScrollPhysics(),
+    child: Center(
         child: widget.isLoading
             ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -187,7 +190,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                         horizontal: 5.0, vertical: 25.0),
                     child: Text.rich(
                       TextSpan(
-                        text: 'Start Time',
+                        text: 'Sleep Time',
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -219,7 +222,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                         horizontal: 5.0, vertical: 25.0),
                     child: Text.rich(
                       TextSpan(
-                        text: 'End Time',
+                        text: 'Wake Up Time',
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -249,7 +252,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               thickness: 2,
             ),
             Text(
-              'Delay Time',
+              'Motion Delay Time',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -382,7 +385,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             )
           ],
         ),
-      ),
+      )),
     );
   }
 }

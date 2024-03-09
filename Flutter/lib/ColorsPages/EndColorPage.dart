@@ -47,8 +47,8 @@ class EndColorPageState extends State<EndColorPage> {
     _loadColorAndMotionDetection(); // Load the saved color and motion detection value when the page is initialized.
   }
 
-  void _onColorChanged(Color color) {
-    setState(() => currentEndColor = color);
+  void _onColorChanged(HSVColor color) {
+    setState(() => currentEndColor = color.toColor());
   }
 
   void _loadColorAndMotionDetection() async {
@@ -86,9 +86,12 @@ class EndColorPageState extends State<EndColorPage> {
         return AlertDialog(
           title: Text("Instructions"),
           content: Text(
-            "1. Set the start and end times for the night light.\n"
-                "2. Adjust delay, rise time, and fade time as desired.\n"
-                "3. Click 'Apply Changes' to save the settings.",
+            "1. Pick a color from the box\n"
+                "2. Change the brightness for night mode by using the top slider\n"
+                "3. Press 'Apply Changes' to see the night mode color on the lights\n"
+                "4. Change the brightness for motion mode by using the top slider\n"
+                "5. Press 'Save Changes' if you want to change the lights to the selected colors\n\n"
+                "*night mode color can be viewed at the top left corner while motion mode can be viewed above its slider without even applying but could be inaccurate",
           ),
           actions: [
             TextButton(
@@ -109,6 +112,7 @@ class EndColorPageState extends State<EndColorPage> {
     backgroundColor: Colors.white70,
     appBar: AppBar(
       centerTitle: true,
+      automaticallyImplyLeading: false,
       backgroundColor: Colors.teal.shade800,
       title: Text(
         'Night Light',
@@ -126,7 +130,9 @@ class EndColorPageState extends State<EndColorPage> {
       var data = '${0}';
       writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
     },
-    child: Center(
+    child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Center(
       child: widget.isLoading
           ? Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -145,8 +151,8 @@ class EndColorPageState extends State<EndColorPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Please Choose the End Color',
-                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                      'Please Choose Night Mode Color',
+                      style: TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
                     ),
                     SizedBox(width: 20,),
                     IconButton(
@@ -157,10 +163,10 @@ class EndColorPageState extends State<EndColorPage> {
                     ),
                   ],
                 ),
-                ColorPicker(
-                  color: currentEndColor,
+                _buildHead(currentEndColor),
+                PaletteValuePicker(
+                  color: HSVColor.fromColor(currentEndColor),
                   onChanged: (value) => _onColorChanged(value),
-                  initialPicker: Picker.paletteValue,
                 ),
                 Divider(
                   height: 15,
@@ -168,20 +174,14 @@ class EndColorPageState extends State<EndColorPage> {
                   thickness: 2,
                 ),
                 Text(
-                  'Motion Detection Intensity',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  'Motion Detection Brightness',
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
                 ),
-                Slider(
+                _buildHead(HSVColor.fromColor(currentEndColor).withValue(motionDetectionValue).toColor()),
+                SliderPicker(
                   value: motionDetectionValue,
-                  onChanged: (value) {
-                    setState(() {
-                      motionDetectionValue = value;
-                    });
-                  },
-                  min: 0,
-                  max: 200,
-                  divisions: 20,
-                  label: motionDetectionValue.round().toString(),
+                  onChanged: (value) => setState((){motionDetectionValue = value;}),
+                  colors: valueColors,
                 ),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -240,10 +240,56 @@ class EndColorPageState extends State<EndColorPage> {
                 )
               ],
             ),
-      ),
+      )),
     ),
   );
 
   }
 
 }
+
+Widget _buildHead(Color color) {
+  return SizedBox(
+    height: 50,
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // Avator
+        Container(
+          width: 32,
+          height: 32,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.fromBorderSide(
+              BorderSide(color: Colors.black26),
+            ),
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: const Border.fromBorderSide(
+                BorderSide(color: Colors.white, width: 3),
+              ),
+              color: color,
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 22),
+
+        // HexPicker
+        Expanded(
+          child: HexPicker(
+            color: color,
+            onChanged: (Color value) => {},
+          ),
+        )
+      ],
+    ),
+  );
+}
+
+List<Color> get valueColors => <Color>[
+  Colors.black,
+  HSVColor.fromColor(currentEndColor).withValue(1.0).toColor(),
+];
