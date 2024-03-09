@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------------------------------
 #include <Adafruit_NeoPixel.h>
 
-#include "time.h"
+#include <TimeLib.h>
 
 #include <Preferences.h>
 
@@ -18,10 +18,16 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 bool configured = false;
+bool manually_configured = false;
+bool was_configured = false;
 bool connecting = false;
 bool color_page = false;
 bool BT_connecting = false;
+bool connected = false;
+bool was_connected = false;
+bool BT_connected = false;
 std::string page = "0";
+BLECharacteristic* pCharacteristic_8 = NULL;
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
@@ -106,7 +112,7 @@ void handleColors(std::string colors, bool high)
     low_hue = hue;
     low_saturation = sat;
     low_value = val;
-    motion_value = (getValue(String(colors.c_str()), '+', 4)).toInt();
+    motion_value = 255*(getValue(String(colors.c_str()), '+', 4)).toFloat();
     prefs.putInt("low_hue", low_hue);
     prefs.putInt("low_saturation", low_saturation);
     prefs.putInt("low_value", low_value);
@@ -129,15 +135,36 @@ int end_time = 0;
 int rise_time = 0;
 int fade_time = 0;
 int delay_time = 0;
+//configure time using time sent by user
+void handleTimeConfig(std::string curr_time)
+{
+  int hour = (getValue(String(curr_time.c_str()), '+', 0)).toInt();
+  int minute =(getValue(String(curr_time.c_str()), '+', 1)).toInt();
+  int second =(getValue(String(curr_time.c_str()), '+', 2)).toInt();
+  int day =(getValue(String(curr_time.c_str()), '+', 3)).toInt();
+  int month =(getValue(String(curr_time.c_str()), '+', 4)).toInt();
+  int year =(getValue(String(curr_time.c_str()), '+', 5)).toInt();
+  setTime(hour, minute, second, day, month, year);
+  manually_configured = true;
+  int value = 1;
+  if(connected)
+    value = 5;
+  pCharacteristic_8->setValue(value);
+  pCharacteristic_8->notify();
+}
 //finds the state neopixel should be in and apply it
 void actAccordingTime(bool motion = false)
 {
   struct tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
+  int time = 0;
+  if(manually_configured)
+    time = hour()*3600 + minute()*60 + second();
+  else if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
     return;
   }
-  int time = timeinfo.tm_hour * 3600 + timeinfo.tm_min*60 + timeinfo.tm_sec;
+  else
+    time = timeinfo.tm_hour * 3600 + timeinfo.tm_min*60 + timeinfo.tm_sec;
   if(start_time <= end_time)
   {
     if(time == start_time)
@@ -206,11 +233,11 @@ void actAccordingTime(bool motion = false)
 //handle times changes
 void handleCycleTimes(std::string times)
 {
-  int start_hours = (getValue(String(times.c_str()), '+', 0)).toInt();
-  int start_minutes = (getValue(String(times.c_str()), '+', 1)).toInt();
+  int start_hours = (getValue(String(times.c_str()), '+', 2)).toInt();
+  int start_minutes = (getValue(String(times.c_str()), '+', 3)).toInt();
   start_time = start_hours * 3600 + start_minutes * 60;
-  int end_hours = (getValue(String(times.c_str()), '+', 2)).toInt();
-  int end_minutes = (getValue(String(times.c_str()), '+', 3)).toInt();
+  int end_hours = (getValue(String(times.c_str()), '+', 0)).toInt();
+  int end_minutes = (getValue(String(times.c_str()), '+', 1)).toInt();
   end_time = end_hours * 3600 + end_minutes * 60;
   rise_time = 60 * (getValue(String(times.c_str()), '+', 4)).toInt();
   fade_time = 60 * (getValue(String(times.c_str()), '+', 5)).toInt();
@@ -264,7 +291,7 @@ void detectMotion()
   }
   else 
   {
-    if(configured)
+    if(configured || manually_configured)
     {
     //Serial.println("Detecting motion off");
       if (pirState == HIGH) {
@@ -317,13 +344,15 @@ void connectWithPref()
       tzset();
       struct tm timeinfo;
       if(!getLocalTime(&timeinfo)){
+        connected = true;
         Serial.println("Failed to obtain time");
         return;
       }
+      configured = true;
+      connected = true;
       Serial.println("Finally Obtained time while connecting to wifi with password saved!!");
       WiFi.disconnect(true);
       WiFi.mode(WIFI_OFF);
-      configured = true;
     }
   }
   else if(ssid_length > 0)
@@ -343,13 +372,15 @@ void connectWithPref()
       tzset();
       struct tm timeinfo;
       if(!getLocalTime(&timeinfo)){
+        connected = true;
         Serial.println("Failed to obtain time");
         return;
       }
+      configured = true;
+      connected = true;
       Serial.println("Finally Obtained time while connecting to wifi with no password saved!!");
       WiFi.disconnect(true);
       WiFi.mode(WIFI_OFF);
-      configured = true;
     }
   }
 }
@@ -389,8 +420,10 @@ BLECharacteristic* pCharacteristic_3 = NULL;
 BLECharacteristic* pCharacteristic_4 = NULL;
 BLECharacteristic* pCharacteristic_5 = NULL;
 BLECharacteristic* pCharacteristic_6 = NULL;
+BLECharacteristic* pCharacteristic_7 = NULL;
 BLEDescriptor *pDescr;
-BLE2902 *pBLE2902;
+BLE2902 *pBLE2902_1;
+BLE2902 *pBLE2902_2;
 #define SERVICE_UUID        "cfdfdee4-a53c-47f4-a4f1-9854017f3817"
 #define CHAR1_UUID          "006e3a0b-1a72-427b-8a00-9d03f029b9a9"
 #define CHAR2_UUID          "81b703d5-518a-4789-8133-04cb281361c3"
@@ -398,6 +431,8 @@ BLE2902 *pBLE2902;
 #define CHAR4_UUID          "125f4480-415c-46e0-ab49-218377ab846a"
 #define CHAR5_UUID          "be31c4e4-c3f7-4b6f-83b3-d9421988d355"
 #define CHAR6_UUID          "c78ed52c-7a26-49ab-ba3c-c4133568a8f2"
+#define CHAR7_UUID          "6d6fb840-ed2b-438f-8375-9220a5164be8"
+#define CHAR8_UUID          "69ce5b3b-3db5-4511-acd1-743d30bcfb37"
 //changing the behavior when getting a data back from client
 class CharacteristicCallBack: public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *pChar) override { 
@@ -428,16 +463,22 @@ class CharacteristicCallBack: public BLECharacteristicCallbacks {
       pixels.fill(rgbcolor);
       pixels.show();
     }
+    else if((pChar->getUUID()).toString() == CHAR7_UUID)
+      handleTimeConfig(pChar->getValue());
   }
 };
 //
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onDisconnect(BLEServer* pServer) {
+      Serial.println("DISCONNECTED");
+      color_page = false;
+      BT_connected = false;
       pServer->startAdvertising();
     }
     void onConnect(BLEServer* pServer) {
       BT_connecting = true;
+      BT_connected = true;
     }
 };
 //starting BLE connection
@@ -446,7 +487,7 @@ void BLEStart()
   BLEDevice::init("NightLightIOT");
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
-  BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID), 30);
+  BLEService *pService = pServer->createService(BLEUUID(SERVICE_UUID), 50);
   pCharacteristic_1 = pService->createCharacteristic(
                       CHAR1_UUID,
                       BLECharacteristic::PROPERTY_READ   |
@@ -481,9 +522,9 @@ void BLEStart()
                       BLECharacteristic::PROPERTY_WRITE  |
                       BLECharacteristic::PROPERTY_NOTIFY
                     );                   
-  pBLE2902 = new BLE2902();
-  pBLE2902->setNotifications(true);
-  pCharacteristic_5->addDescriptor(pBLE2902);
+  pBLE2902_1 = new BLE2902();
+  pBLE2902_1->setNotifications(true);
+  pCharacteristic_5->addDescriptor(pBLE2902_1);
   pCharacteristic_5->setCallbacks(new CharacteristicCallBack());
   pCharacteristic_6 = pService->createCharacteristic(
                       CHAR6_UUID,
@@ -492,6 +533,23 @@ void BLEStart()
                     );                   
   pCharacteristic_6->addDescriptor(new BLE2902());
   pCharacteristic_6->setCallbacks(new CharacteristicCallBack());
+  pCharacteristic_7 = pService->createCharacteristic(
+                      CHAR7_UUID,
+                      BLECharacteristic::PROPERTY_READ   |
+                      BLECharacteristic::PROPERTY_WRITE  
+                    );                   
+  pCharacteristic_7->addDescriptor(new BLE2902());
+  pCharacteristic_7->setCallbacks(new CharacteristicCallBack());
+  pCharacteristic_8 = pService->createCharacteristic(
+                      CHAR8_UUID,
+                      BLECharacteristic::PROPERTY_READ   |
+                      BLECharacteristic::PROPERTY_WRITE  |
+                      BLECharacteristic::PROPERTY_NOTIFY
+                    );                   
+  pBLE2902_2 = new BLE2902();
+  pBLE2902_2->setNotifications(true);
+  pCharacteristic_8->addDescriptor(pBLE2902_2);
+  pCharacteristic_8->setCallbacks(new CharacteristicCallBack());
   pService->start();
 
   // Start advertising
@@ -525,8 +583,9 @@ String getValue(String data, char separator, int index){
 //------------------------------------------------------------------------------------------------------
 void handleCredentials(std::string credentials)
 {
+  bool now_connected = false;
   connecting = true;
-  int value = 1;
+  int value = 3;
   for(int i=0; i < 3; i++)
   {
     String ssid;
@@ -567,24 +626,38 @@ void handleCredentials(std::string credentials)
       setenv("TZ", "IST-2IDT,M3.4.4/26,M10.5.0", 1);
       tzset();
       struct tm timeinfo;
-      if(!getLocalTime(&timeinfo)){
+      if(!getLocalTime(&timeinfo, 2000)){
+        now_connected = true;
+        connected = true;
+        was_connected = true;
         Serial.println("Failed to obtain time");
+      }
+      else
+      {
+        now_connected = true;
+        connected = true;
+        was_connected = true;
+        Serial.println("Finally Obtained time while connecting from WiFi from app!!");
+        WiFi.disconnect(true);
+        WiFi.mode(WIFI_OFF);
+        was_configured = true;
+        configured = true;
         pCharacteristic_5->setValue(value);
         pCharacteristic_5->notify();
         connecting = false;
         return;
       }
-      Serial.println("Finally Obtained time while connecting from WiFi from app!!");
-      WiFi.disconnect(true);
-      WiFi.mode(WIFI_OFF);
-      configured = true;
-      pCharacteristic_5->setValue(value);
-      pCharacteristic_5->notify();
-      connecting = false;
-      return;
     }
   }
-  value = 0;
+  if(now_connected){
+    value = 2;
+    if(manually_configured)
+      value = 5;
+  }
+  else if (configured || manually_configured)
+    value = 1;
+  else
+    value = 0;
   pCharacteristic_5->setValue(value);
   pCharacteristic_5->notify();
   connecting = false;
@@ -612,17 +685,70 @@ void setup(){
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
 void loop(){
+  if(configured && !was_configured && BT_connected && !BT_connecting)
+  {
+    was_configured = true;
+    int value = 3;
+    pCharacteristic_8->setValue(value);
+    pCharacteristic_8->notify();
+    was_connected = true;
+  }
+  else if(connected && !was_connected && BT_connected && !BT_connecting)
+  {
+    was_connected = true;
+    int value = 2;
+    if(configured)
+    {
+      value = 3;
+      was_configured = true;
+    }
+    else if(manually_configured)
+      value = 5;
+    pCharacteristic_8->setValue(value);
+    pCharacteristic_8->notify();
+  }
   if(BT_connecting)
   {
     for(int i=0; i < 3; i++){
         pixels.fill(6553600);
         pixels.show();
-        delay(100);
+        delay(700);
         pixels.clear();
         pixels.show();
-        delay(100);
+        delay(700);
       }
-    BT_connecting = false;
+      if(page != "0")
+      {
+        int hue = high_hue;
+        int sat = high_saturation;
+        int val = high_value;
+        if(page == "2")
+        {
+          hue = low_hue;
+          sat = low_saturation;
+          val = low_value;
+        }
+        uint32_t rgbcolor = pixels.gamma32(pixels.ColorHSV(hue, sat, val));
+        Serial.println(rgbcolor);
+        pixels.fill(rgbcolor);
+        pixels.show();
+        color_page = true;
+      }
+      int value = 0;
+      if(connected)
+      {
+        was_connected = true;
+        value = 2;
+        if(configured)
+        {
+          was_configured = true;
+          value = 3;
+        }
+      }
+      Serial.println(value);
+      pCharacteristic_8->setValue(value);
+      pCharacteristic_8->notify();
+      BT_connecting = false;
   }
   delay(200);
   if(!color_page)
