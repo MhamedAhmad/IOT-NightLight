@@ -712,10 +712,10 @@ void loop(){
     for(int i=0; i < 3; i++){
         pixels.fill(6553600);
         pixels.show();
-        delay(700);
+        delay(400);
         pixels.clear();
         pixels.show();
-        delay(700);
+        delay(400);
       }
       if(page != "0")
       {
@@ -744,7 +744,11 @@ void loop(){
           was_configured = true;
           value = 3;
         }
+        else if(manually_configured)
+          value = 5;
       }
+      else if(manually_configured)
+        value = 1;
       Serial.println(value);
       pCharacteristic_8->setValue(value);
       pCharacteristic_8->notify();
