@@ -92,7 +92,11 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
           print(escaped);
           if (!connected && !inside && !popup && !escaped) {
             showDialog(context: context, builder: (context) {
-              return Center(child: CircularProgressIndicator());
+              return PopScope(child: Center(child: CircularProgressIndicator()),
+                canPop: false,
+                onPopInvoked: (bool didPop) {
+                  return;
+                },);
             },);
             bool this_connected = false;
             Future.delayed(const Duration(milliseconds: 5000), () async {
@@ -119,21 +123,21 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
         case AppLifecycleState.paused:
         // --
           if (initialized && connected)
-            await targetDevice.disconnect();
+            targetDevice.disconnect();
           connected = false;
           print('Paused');
           break;
         case AppLifecycleState.detached:
         // --
           if (initialized && connected)
-            await targetDevice.disconnect();
+            targetDevice.disconnect();
           connected = false;
           print('Detached');
           break;
         case AppLifecycleState.hidden:
         // A new **hidden** state has been introduced in latest flutter version
           if (initialized && connected)
-            await targetDevice.disconnect();
+            targetDevice.disconnect();
           connected = false;
           print('Hidden');
           break;

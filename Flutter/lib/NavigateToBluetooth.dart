@@ -16,6 +16,7 @@ bool wifi_connected = false;
 bool configured = false;
 bool manually_configured = false;
 bool called = false;
+bool fast_reload = false;
 
 class BluetoothButtonPage extends StatefulWidget {
   const BluetoothButtonPage({super.key});
@@ -43,6 +44,19 @@ discoverServices() async {
         characteristicDictionary[characteristics.uuid.toString()] = characteristics;
       }
     }
+  }
+  if(!called) {
+    called = true;
+    var deviceStateSubscription = targetDevice.state.listen((s) async {
+      if (s == BluetoothDeviceState.disconnected) {
+        fast_reload = false;
+        await Future.delayed(const Duration(milliseconds:1500));
+        if(!fast_reload)
+          manually_configured = false;
+      }
+      else if(s == BluetoothDeviceState.connected)
+        fast_reload = true;
+    });
   }
   characteristicDictionary["69ce5b3b-3db5-4511-acd1-743d30bcfb37"]?.setNotifyValue(true);
   var stream = characteristicDictionary["69ce5b3b-3db5-4511-acd1-743d30bcfb37"]?.value.listen((event) {
@@ -125,8 +139,12 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
                 ),
                 onPressed: () async {
 connected = false;
-            showDialog(context: context, builder: (context) {
-              return Center(child: CircularProgressIndicator());
+showDialog(context: context, builder: (context) {
+              return PopScope(child: Center(child: CircularProgressIndicator()),
+                canPop: false,
+                onPopInvoked: (bool didPop) {
+                  return;
+                },);
             },);
             FlutterBlue BT = FlutterBlue.instance;
             BT.scan(timeout: Duration(seconds: 5)).listen((scanResult) async {
