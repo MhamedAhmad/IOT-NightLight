@@ -285,17 +285,17 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Rise Time',
+                      'Fade Time',
                       style: TextStyle(
                           fontSize: 20,
                           color: Colors.black,
                           fontWeight: FontWeight.bold),
                     ),
                     DropdownButton<int>(
-                      value: widget.riseTime,
+                      value: widget.fadeTime,
                       onChanged: (int? newValue) {
                         setState(() {
-                          widget.riseTime = newValue!;
+                          widget.fadeTime = newValue!;
                         });
                       },
                       items: List.generate(
@@ -313,15 +313,15 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Fade Time',
+                      'Rise Time',
                       style: TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     DropdownButton<int>(
-                      value: widget.fadeTime,
+                      value: widget.riseTime,
                       onChanged: (int? newValue) {
                         setState(() {
-                          widget.fadeTime = newValue!;
+                          widget.riseTime = newValue!;
                         });
                       },
                       items: List.generate(
