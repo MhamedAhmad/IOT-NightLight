@@ -105,7 +105,6 @@ class _MyHomePageState extends State<MyHomePage> {
     print('here');
     if ((_selectedIndex == 1 && index != 1)) {
       if(startSaved==false && startApplied==true) {
-        print('snkfs');
         startApplied = false;
         showWarningDialog('StartColorPage', index);
       }
@@ -194,6 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         Navigator.of(context).pop();
       },
+
     );
 
     AlertDialog alert = AlertDialog(
@@ -221,7 +221,6 @@ class _MyHomePageState extends State<MyHomePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('startColor', color.value);
 
-      print('djs');
       print(color);
 
       HSVColor hsvDecode = HSVColor.fromColor(currentStartColor);
@@ -250,31 +249,37 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: _pages[_selectedIndex],
-          bottomNavigationBar: ConvexAppBar(
-            style: TabStyle.reactCircle,
-            color: Colors.white,
-            backgroundColor: Colors.teal.shade800,
-            items: [
-              TabItem(icon: (configured||manually_configured) ? Icons.timer_outlined: Icons.timer_off_outlined,
-                  title: 'Time'),
-              TabItem(icon: Icons.sunny, title: 'Day Mode'),
-              TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
-              TabItem(icon: wifi_connected ? Icons.wifi : Icons.wifi_off,
-                  title: 'WiFi'),
-            ],
-            onTap: _onItemTapped,
-          ),
-        )
-        , canPop: false,
-        onPopInvoked: (bool didPop) {
-          if (didPop)
-            return;
-          _onBackButtonPressed(context);
-        });
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+          children: [
+            Expanded(
+              child: _pages[_selectedIndex],
+            ),
+          ],
+        ),
+        bottomNavigationBar: ConvexAppBar(
+          style: TabStyle.reactCircle,
+          color: Colors.white,
+          backgroundColor: Colors.teal.shade800,
+          items: [
+            TabItem(icon: (configured || manually_configured) ? Icons.timer_outlined : Icons.timer_off_outlined, title: 'Time'),
+            TabItem(icon: Icons.sunny, title: 'Day Mode'),
+            TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
+            TabItem(icon: wifi_connected ? Icons.wifi : Icons.wifi_off, title: 'WiFi'),
+          ],
+          onTap: _onItemTapped,
+        ),
+      ),
+      canPop: false,
+      onPopInvoked: (bool didPop) {
+        if (didPop)
+          return;
+        _onBackButtonPressed(context);
+      },
+    );
   }
+
 
     Future<void> _onBackButtonPressed(BuildContext context) async{
       await showDialog(

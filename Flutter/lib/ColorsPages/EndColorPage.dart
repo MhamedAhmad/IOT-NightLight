@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../HomePage.dart';
 
-Color currentEndColor = Colors.blue;
+Color currentEndColor = Colors.red;
 double motionDetectionValue = 0;
 bool endSaved=false;
 bool endApplied=false;
@@ -55,11 +55,11 @@ class EndColorPageState extends State<EndColorPage> {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int colorValue = prefs.getInt('endColor') ?? Colors.blue.value;
-    double motionDetectionValue = prefs.getDouble('motionDetectionValue') ?? 0;
+    double loadedMotionDetectionValue = prefs.getDouble('motionDetectionValue') ?? 0;
 
     setState(() {
       currentEndColor = Color(colorValue);
-      motionDetectionValue = motionDetectionValue;
+      motionDetectionValue = loadedMotionDetectionValue; // Use the class-level variable here
       widget.isLoading = false; // Set loading to false after data is loaded
     });
   }
@@ -168,11 +168,15 @@ class EndColorPageState extends State<EndColorPage> {
                   color: HSVColor.fromColor(currentEndColor),
                   onChanged: (value) => _onColorChanged(value),
                 ),
+                SizedBox(height: 20,),
+
                 Divider(
                   height: 15,
                   color: Colors.teal.shade800,
                   thickness: 2,
                 ),
+                SizedBox(height: 20,),
+
                 Text(
                   'Motion Detection Brightness',
                   style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
@@ -183,6 +187,8 @@ class EndColorPageState extends State<EndColorPage> {
                   onChanged: (value) => setState((){motionDetectionValue = value;}),
                   colors: valueColors,
                 ),
+                SizedBox(height: 14,),
+
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

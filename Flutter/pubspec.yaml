@@ -43,6 +43,7 @@ dependencies:
   convex_bottom_bar: ^3.2.0
   shared_preferences: ^2.2.2
   google_fonts: ^6.2.1
+  percent_indicator: ^4.2.3
   #flutter_blue_plus: ^1.31.13
   #flutter_reactive_ble: ^5.3.1
 
@@ -55,7 +56,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -68,9 +69,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-
   assets:
-     - assets/backgroundpic.jpg
+    - assets/graph.jpg
+    - assets/backgroundpic.jpg
 
   fonts:
     - family: Alef

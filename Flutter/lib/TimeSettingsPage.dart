@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:nightlight/ColorsPages/EndColorPage.dart';
+import 'package:nightlight/ColorsPages/StartColorPage.dart';
 import 'HomePage.dart';
-import 'dart:developer';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:percent_indicator/percent_indicator.dart'; // Import the package
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+
 
 class TimeSettingsPage extends StatefulWidget {
   TimeSettingsPage(this.c_uid, {Key? key});
@@ -11,6 +14,7 @@ class TimeSettingsPage extends StatefulWidget {
   TimeOfDay? _startTime = TimeOfDay.now();
   TimeOfDay? _endTime = TimeOfDay.now();
   int delayTime = 0;
+  int transitionTime = 0;
   int riseTime = 0;
   int fadeTime = 0;
   bool isLoading = true;
@@ -21,11 +25,126 @@ class TimeSettingsPage extends StatefulWidget {
 }
 
 class _TimeSettingsPageState extends State<TimeSettingsPage> {
+
   @override
   void initState() {
     super.initState();
-    _loadTimeSettings(); // Load the saved time settings when the page is initialized.
+    _loadTimeSettings();
+
   }
+
+  bool get _isFadingIn {
+    DateTime now = DateTime.now();
+    DateTime startTime = DateTime(now.year, now.month, now.day, widget._startTime!.hour, widget._startTime!.minute);
+    DateTime fadeInEndTime = DateTime(
+      startTime.year,
+      startTime.month,
+      startTime.day,
+      (startTime.hour * 60 + startTime.minute - widget.fadeTime) ~/ 60, // Extracting hours
+      (startTime.hour * 60 + startTime.minute - widget.fadeTime) % 60,  // Extracting minutes
+    );
+
+    return now.isBefore(startTime) && now.isAfter(fadeInEndTime);
+  }
+
+  bool get _isNightMode {
+    DateTime now = DateTime.now();
+    DateTime startTime = DateTime(now.year, now.month, now.day, widget._startTime!.hour, widget._startTime!.minute);
+    DateTime endTime = DateTime(now.year, now.month, now.day, widget._endTime!.hour, widget._endTime!.minute);
+    DateTime tranistion = DateTime(
+      endTime.year,
+      endTime.month,
+      endTime.day,
+      (endTime.hour * 60 + endTime.minute - widget.transitionTime) ~/ 60, // Extracting hours
+      (endTime.hour * 60 + endTime.minute - widget.transitionTime) % 60,  // Extracting minutes
+    );
+
+    return now.isBefore(tranistion) && now.isAfter(startTime);
+  }
+
+  bool get _isTransitioning {
+
+    DateTime now = DateTime.now();
+    DateTime endTime = DateTime(now.year, now.month, now.day, widget._endTime!.hour, widget._endTime!.minute);
+    DateTime tranistion = DateTime(
+      endTime.year,
+      endTime.month,
+      endTime.day,
+      (endTime.hour * 60 + endTime.minute - widget.transitionTime) ~/ 60, // Extracting hours
+      (endTime.hour * 60 + endTime.minute - widget.transitionTime) % 60,  // Extracting minutes
+    );
+    return now.isBefore(endTime) && now.isAfter(tranistion);
+  }
+
+  bool get _isFadingOut {
+    DateTime now = DateTime.now();
+    DateTime endTime = DateTime(now.year, now.month, now.day, widget._endTime!.hour, widget._endTime!.minute);
+    DateTime fadeOutEndTime = DateTime(
+      endTime.year,
+      endTime.month,
+      endTime.day,
+      (endTime.hour * 60 + endTime.minute + widget.fadeTime) ~/ 60, // Extracting hours
+      (endTime.hour * 60 + endTime.minute + widget.fadeTime) % 60,  // Extracting minutes
+    );
+    print(fadeOutEndTime);
+
+
+    return now.isAfter(endTime) && now.isBefore(fadeOutEndTime);
+  }
+
+
+  Widget _buildCenterText() {
+    if (_isFadingIn) {
+      return Text(
+        "Fading In",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+      );
+    } else if (_isNightMode) {
+      return Text(
+        "Night Running",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+      );
+    } else if (_isTransitioning) {
+      return Text(
+        "Transitioning",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+      );
+    } else if (_isFadingOut) {
+      return Text(
+        "Fading Out",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+      );
+    } else {
+      return Text(
+        "OFF",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+      );
+    }
+  }
+
+
+  double _calculateProgress() {
+    if (widget._startTime == null || widget._endTime == null) {
+      return 0.0;
+    }
+
+    DateTime now = DateTime.now();
+    DateTime startTime = DateTime(now.year, now.month, now.day, widget._startTime!.hour, widget._startTime!.minute)
+        .subtract(Duration(minutes: widget.riseTime));
+    DateTime endTimeWithFadeOut = DateTime(now.year, now.month, now.day, widget._endTime!.hour, widget._endTime!.minute)
+        .add(Duration(minutes: widget.fadeTime));
+
+    Duration totalDuration = endTimeWithFadeOut.difference(startTime);
+    Duration elapsedTime = now.difference(startTime);
+    double progress = elapsedTime.inMilliseconds / totalDuration.inMilliseconds;
+
+    // Ensure progress is between 0 and 1
+    progress = progress.clamp(0.0, 1.0);
+    return progress;
+  }
+
+
+
 
   void _showTimePicker(bool setStart) {
     showTimePicker(
@@ -90,6 +209,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       widget.delayTime = prefs.getInt('delayTime') ?? 0;
       widget.riseTime = prefs.getInt('riseTime') ?? 0;
       widget.fadeTime = prefs.getInt('fadeTime') ?? 0;
+      widget.transitionTime = prefs.getInt('transitionTime') ?? 0;
       widget.isLoading = false;
     });
   }
@@ -103,6 +223,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     prefs.setInt('delayTime', widget.delayTime);
     prefs.setInt('riseTime', widget.riseTime);
     prefs.setInt('fadeTime', widget.fadeTime);
+    prefs.setInt('transitionTime', widget.transitionTime);
+
   }
 
   void _showInstructions() {
@@ -111,10 +233,22 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Instructions"),
-          content: Text(
-            "1. Set sleep and wake up times for the night light.\n"
-                "2. Set motion delay time, rise time, and fade time (in minutes) as desired.\n"
-                "3. Press 'Apply Changes' to save the settings.",
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "1. Set sleep and wake up times for the night light.\n"
+                    "2. Set motion delay time, rise time, and fade time (in minutes) as desired.\n"
+                    "3. Press 'Apply Changes' to save the settings.",
+              ),
+              SizedBox(height: 10), // Adjust spacing between text and image
+              Image.asset(
+                'assets/graph.jpg', // Replace this with your image asset path
+                width: 400, // Adjust width as needed
+                height: 300, // Adjust height as needed
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -251,6 +385,72 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               color: Colors.teal.shade800,
               thickness: 2,
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Fade In',
+                      style: TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    DropdownButton<int>(
+                      value: widget.fadeTime,
+                      onChanged: (int? newValue) {
+                        setState(() {
+                          widget.fadeTime = newValue!;
+                        });
+                      },
+                      items: List.generate(
+                          //limitFTime() + 1,
+                        121,
+                              (index) {
+                            return DropdownMenuItem<int>(
+                              value: index,
+                              child: Text(index.toString()),
+                            );
+                          }),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Fade Out',
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    DropdownButton<int>(
+                      value: widget.riseTime,
+                      onChanged: (int? newValue) {
+                        setState(() {
+                          widget.riseTime = newValue!;
+                        });
+                      },
+                      items: List.generate(
+                          //limitRTime() + 1,
+                         121,
+                              (index) {
+                            return DropdownMenuItem<int>(
+                              value: index,
+                              child: Text(index.toString()),
+                            );
+                          }),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Divider(
+              height: 100,
+              color: Colors.teal.shade800,
+              thickness: 2,
+            ),
             Text(
               'Motion Delay Time',
               style: TextStyle(
@@ -273,70 +473,35 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                 );
               }),
             ),
+
             Divider(
               height: 100,
               color: Colors.teal.shade800,
               thickness: 2,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Rise Time',
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    DropdownButton<int>(
-                      value: widget.riseTime,
-                      onChanged: (int? newValue) {
-                        setState(() {
-                          widget.riseTime = newValue!;
-                        });
-                      },
-                      items: List.generate(
-                          limitRTime() + 1,
-                              (index) {
-                            return DropdownMenuItem<int>(
-                              value: index,
-                              child: Text(index.toString()),
-                            );
-                          }),
-                    ),
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Fade Time',
-                      style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    DropdownButton<int>(
-                      value: widget.fadeTime,
-                      onChanged: (int? newValue) {
-                        setState(() {
-                          widget.fadeTime = newValue!;
-                        });
-                      },
-                      items: List.generate(
-                          limitFTime() + 1,
-                              (index) {
-                            return DropdownMenuItem<int>(
-                              value: index,
-                              child: Text(index.toString()),
-                            );
-                          }),
-                    ),
-                  ],
-                ),
-              ],
+            Text(
+              'Transition Time',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Alef',
+              ),
             ),
+            DropdownButton<int>(
+              value: widget.transitionTime,
+              onChanged: (int? newValue) {
+                setState(() {
+                  widget.transitionTime = newValue!;
+                });
+              },
+              items: List.generate(11, (index) {
+                return DropdownMenuItem<int>(
+                  value: index,
+                  child: Text(index.toString()),
+                );
+              }),
+            ),
+
             SizedBox(
               height: 30,
             ),
@@ -346,7 +511,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                 var start = widget._startTime ?? TimeOfDay.now();
                 var end = widget._endTime ?? TimeOfDay.now();
                 var data =
-                    '${start.hour}+${start.minute}+${end.hour}+${end.minute}+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}';
+                    '${start.hour}+${start.minute}+${end.hour}+${end.minute}+${widget.riseTime}+${widget.fadeTime}+${widget.delayTime}+${widget.transitionTime}';
                 writeDataWithCharacteristic(
                     widget.c_uid, data, context);
                 Widget okButton = TextButton(
@@ -379,10 +544,33 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                 backgroundColor: Colors.teal.shade800,
               ),
               child: Text(
-                'Apply Changes',
+                'Save Changes',
                 style: TextStyle(color: Colors.white),
               ),
-            )
+            ),
+
+
+            SizedBox(
+              height: 30,
+            ),
+
+
+            new CircularPercentIndicator(
+              radius: 100.0,
+              animation: true,
+              animationDuration: 2000,
+              lineWidth: 15.0,
+              percent: _calculateProgress(),
+              center: _buildCenterText(),
+              circularStrokeCap: CircularStrokeCap.butt,
+              backgroundColor: Colors.grey.shade300,
+              progressColor: _calculateProgress()==1?  currentStartColor: currentEndColor,
+            ),
+
+            SizedBox(
+              height: 30,
+            ),
+
           ],
         ),
       )),
