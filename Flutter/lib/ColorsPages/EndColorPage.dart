@@ -55,11 +55,11 @@ class EndColorPageState extends State<EndColorPage> {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int colorValue = prefs.getInt('endColor') ?? Colors.blue.value;
-    double loadedMotionDetectionValue = prefs.getDouble('motionDetectionValue') ?? 0;
+    double motionDetectionVal = prefs.getDouble('motionDetectionValue') ?? 0;
 
     setState(() {
       currentEndColor = Color(colorValue);
-      motionDetectionValue = loadedMotionDetectionValue; // Use the class-level variable here
+      motionDetectionValue = motionDetectionVal;
       widget.isLoading = false; // Set loading to false after data is loaded
     });
   }

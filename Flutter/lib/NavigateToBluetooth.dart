@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:nightlight/WIFISettingsPage.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'BTConnect.dart';
 import 'HomePage.dart';
@@ -51,8 +52,9 @@ discoverServices() async {
       if (s == BluetoothDeviceState.disconnected) {
         fast_reload = false;
         await Future.delayed(const Duration(milliseconds:1500));
-        if(!fast_reload)
+        if(!fast_reload) {
           manually_configured = false;
+        }
       }
       else if(s == BluetoothDeviceState.connected)
         fast_reload = true;
@@ -138,6 +140,16 @@ class _BluetoothButtonPageState extends State<BluetoothButtonPage> {
                   ),
                 ),
                 onPressed: () async {
+                  //await Permission.location.request();
+                  //await Permission.locationAlways.request();
+                  //await Permission.locationAlways.request();
+                  //await Permission.bluetooth.request();
+                  //await Permission.bluetoothScan.request();
+                  //await Permission.bluetoothConnect.request();
+                  await checkPermission(Permission.location, context);
+                  await checkPermission(Permission.bluetoothConnect, context);
+                  await checkPermission(Permission.bluetoothScan, context);
+                  //await openAppSettings();
 connected = false;
 showDialog(context: context, builder: (context) {
               return PopScope(child: Center(child: CircularProgressIndicator()),
@@ -258,4 +270,10 @@ showDialog(context: context, builder: (context) {
       },
     );
   }
+}
+
+Future<void> checkPermission(Permission permission, BuildContext context) async{
+  final status = await permission.request();
+  if(!status.isGranted)
+    openAppSettings();
 }
