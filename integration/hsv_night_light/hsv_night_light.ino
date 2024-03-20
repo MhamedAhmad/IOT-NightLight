@@ -17,6 +17,11 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+uint32_t first_motion = 0;
+uint32_t last_motion = 4294967;
+int delay_time = 0;
+uint32_t my_now = 0;
+int offset = 0;
 bool configured = false;
 bool manually_configured = false;
 bool was_configured = false;
@@ -55,27 +60,60 @@ int high_saturation = 0;
 int high_value = 0;
 int motion_value = 0;
 //turn on pixels
-void light(float fraction, bool motion=false)
+void light(float fraction, byte mode, bool motion=false)
 {
   int hue = 0;
   int sat = 0;
   int val = 0;
+  int top_hue = 0;
+  int top_sat = 0;
+  int top_val = 0;
+  int bot_hue = 0;
+  int bot_sat = 0;
+  int bot_val = 0;
+  if(mode == 0)
+  {
+    bot_hue = low_hue;
+    top_hue = low_hue;
+    top_sat = low_saturation;
+    top_val = low_value;
+  }
+  else if(mode == 1)
+  {
+    bot_hue = low_hue;
+    bot_sat = low_saturation;
+    bot_val = low_value;
+    top_hue = high_hue;
+    top_sat = high_saturation;
+    top_val = high_value;
+  }
+  else
+  {
+    bot_hue = high_hue;
+    top_hue = high_hue;
+    bot_sat = high_saturation;
+    bot_val = high_value;
+  }
   if(motion)
   {
     hue = low_hue;
     sat = low_saturation;
     val = motion_value;
+    if(my_now + offset < first_motion + 10)
+      val = ((my_now+ offset -first_motion)/(float)10) * motion_value + (1-((my_now+ offset -first_motion)/(float)10)) * low_value;
+    else if(my_now > last_motion + delay_time && my_now <= last_motion + delay_time + 10)
+      val = ((my_now -(last_motion + delay_time))/(float)10) * low_value + (1-((my_now -(last_motion + delay_time))/(float)10)) * motion_value;
   }
   else
   {
-    if((high_hue > low_hue && high_hue - low_hue < 32768) || (high_hue <= low_hue && low_hue - high_hue < 32768))
-      hue = fraction * high_hue + (1-fraction) * low_hue;
-    else if(low_hue < 32768)
-      hue = (int)(fraction * high_hue + (1-fraction) * (65536 + low_hue)) % 65536;
+    if((top_hue > bot_hue && top_hue - bot_hue < 32768) || (top_hue <= bot_hue && bot_hue - top_hue < 32768))
+      hue = fraction * top_hue + (1-fraction) * bot_hue;
+    else if(bot_hue < 32768)
+      hue = (int)(fraction * top_hue + (1-fraction) * (65536 + bot_hue)) % 65536;
     else
-      hue = (int)(fraction * (65536 + high_hue) + (1-fraction) * low_hue) % 65536;
-    sat = fraction * high_saturation + (1-fraction) * low_saturation;
-    val = fraction * high_value + (1-fraction) * low_value;
+      hue = (int)(fraction * (65536 + top_hue) + (1-fraction) * bot_hue) % 65536;
+    sat = fraction * top_sat + (1-fraction) * bot_sat;
+    val = fraction * top_val + (1-fraction) * bot_val;
   }
   uint32_t rgbcolor = pixels.gamma32(pixels.ColorHSV(hue, sat, val));
   pixels.fill(rgbcolor);
@@ -130,11 +168,11 @@ void handleColors(std::string colors, bool high)
 const char* ntpServer = "time.google.com";
 const long  gmtOffset_sec = 7200;
 const int   daylightOffset_sec = 3600;
-int start_time = 0;
-int end_time = 0;
+int wake_time = 0;
+int sleep_time = 0;
 int rise_time = 0;
 int fade_time = 0;
-int delay_time = 0;
+int transition_time = 0;
 //configure time using time sent by user
 void handleTimeConfig(std::string curr_time)
 {
@@ -157,107 +195,146 @@ void actAccordingTime(bool motion = false)
 {
   struct tm timeinfo;
   int time = 0;
-  if(manually_configured)
+  if(configured)
+  {
+    getLocalTime(&timeinfo);
+    time = timeinfo.tm_hour * 3600 + timeinfo.tm_min*60 + timeinfo.tm_sec;
+  }
+  else if(manually_configured)
     time = hour()*3600 + minute()*60 + second();
-  else if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
+  else
+  {
     return;
   }
-  else
-    time = timeinfo.tm_hour * 3600 + timeinfo.tm_min*60 + timeinfo.tm_sec;
-  if(start_time <= end_time)
+  if(wake_time <= sleep_time)
   {
-    if(time == start_time)
-      light(0);
-    else if(time == end_time)
-      light(1, motion);
-    else if(time > start_time && time < start_time + rise_time)
-      light((time-start_time)/(float)rise_time);
-    else if(time >= start_time + rise_time && time < end_time)
-      light(1);
-    else if(time >= end_time + fade_time)
-      light(0, motion);
-    else
+    if(time == wake_time)
+      light(0, 2);
+    else if(time == sleep_time)
+      light(1, 0, motion);
+    else if(time > wake_time && time < wake_time + fade_time)
+      light((time-wake_time)/(float)fade_time, 2);
+    else if(time >= wake_time + fade_time && time < sleep_time)
     {
-      if(end_time + fade_time <= 24 * 3600)
+      if(time < sleep_time - rise_time)
+        light(1, 2);
+      else
+        light((time - (sleep_time - rise_time))/(float)rise_time, 0);
+    }
+    else if(time >= sleep_time)
+    {
+      if(wake_time >= transition_time)
       {
-        if(time < start_time)
-          light(0, motion);
-        else
-          light(1-(time-end_time)/(float)fade_time, motion);
+        light(0, 1, motion);
       }
       else
       {
-        if(time > end_time)
-          light(1-(time-end_time)/(float)fade_time, motion);
-        else if(time + 24 * 3600 >= end_time + fade_time)
-          light(0, motion);
+        if(time < wake_time - transition_time + 24 * 3600)
+          light(0, 1, motion);
         else
-          light(1-(time + 24 * 3600-end_time)/(float)fade_time, motion);
+        {
+          light((time-(wake_time - transition_time + 24 * 3600))/(float)transition_time, 1);
+        }
       }
+    }
+    else
+    {
+      if(wake_time >= transition_time)
+      {
+        if(time < wake_time - transition_time)
+          light(0, 1, motion);
+        else
+          light((time-(wake_time - transition_time))/(float)transition_time, 1);
+      }
+      else
+        light((time-(wake_time - transition_time))/(float)transition_time, 1);
     }
   }
   else
   {
-    if(time == start_time)
-      light(0);
-    else if(time == end_time)
-      light(1);
-    else if(time > end_time && time < end_time + fade_time)
-      light(1-(time-end_time)/(float)fade_time, motion);
-    else if(time >= end_time + fade_time && time < start_time)
-      light(0, motion);
-    else if(time >= start_time + rise_time)
-      light(1);
-    else
+    if(time == wake_time)
+      light(0, 2);
+    else if(time == sleep_time)
+      light(1, 0, motion);
+    else if(time > sleep_time && time < wake_time - transition_time)
+      light(1, 0, motion);
+    else if(time >= sleep_time && time < wake_time)
+      light((time-(wake_time - transition_time))/(float)transition_time, 1);
+    else if(time >= wake_time)
     {
-      if(start_time + rise_time <= 24 * 3600)
+      if(wake_time + fade_time >= 24 * 3600)
+        light((time-wake_time)/(float)fade_time, 2);
+      else if(sleep_time > rise_time)
       {
-        if(time < end_time)
-          light(1);
+        if(time > wake_time + fade_time)
+          light(1, 2);
         else
-          light((time-start_time)/(float)rise_time);
+          light((time-wake_time)/(float)fade_time, 2);
       }
       else
       {
-        if(time > start_time)
-          light((time-start_time)/(float)rise_time);
-        else if(time + 24 * 3600 >= start_time + rise_time)
-          light(1);
+        if(time <= wake_time + fade_time)
+          light((time-wake_time)/(float)fade_time, 2);
+        else if(time <= sleep_time - rise_time + 24 * 3600)
+          light(1, 2);
         else
-          light((time + 24 * 3600-start_time)/(float)rise_time);
+          light((time-(sleep_time - rise_time + 24 * 3600))/(float)rise_time, 0);
       }
+    }
+    else
+    {
+      if(wake_time + fade_time >= 24 * 3600)
+      {
+        if(time <= wake_time + fade_time - 24 * 3600)
+          light((time-(wake_time - 24 * 3600))/(float)fade_time, 2);
+        else if(time <= sleep_time - rise_time)
+          light(0, 0);
+        else
+          light((time-(sleep_time - rise_time))/(float)rise_time, 0);
+      }
+      else if(sleep_time > rise_time)
+      {
+        if(time <= sleep_time - rise_time)
+          light(0, 0);
+        else
+          light((time-(sleep_time - rise_time))/(float)rise_time, 0);
+      }
+      else
+        light((time-(sleep_time - rise_time + 24 * 3600))/(float)rise_time, 0);
     }
   }
 }
 //handle times changes
 void handleCycleTimes(std::string times)
 {
-  int start_hours = (getValue(String(times.c_str()), '+', 2)).toInt();
-  int start_minutes = (getValue(String(times.c_str()), '+', 3)).toInt();
-  start_time = start_hours * 3600 + start_minutes * 60;
-  int end_hours = (getValue(String(times.c_str()), '+', 0)).toInt();
-  int end_minutes = (getValue(String(times.c_str()), '+', 1)).toInt();
-  end_time = end_hours * 3600 + end_minutes * 60;
+  int wake_hours = (getValue(String(times.c_str()), '+', 2)).toInt();
+  int wake_minutes = (getValue(String(times.c_str()), '+', 3)).toInt();
+  wake_time = wake_hours * 3600 + wake_minutes * 60;
+  int sleep_hours = (getValue(String(times.c_str()), '+', 0)).toInt();
+  int sleep_minutes = (getValue(String(times.c_str()), '+', 1)).toInt();
+  sleep_time = sleep_hours * 3600 + sleep_minutes * 60;
   rise_time = 60 * (getValue(String(times.c_str()), '+', 4)).toInt();
   fade_time = 60 * (getValue(String(times.c_str()), '+', 5)).toInt();
-  delay_time = 60 * (getValue(String(times.c_str()), '+', 6)).toInt();
+  delay_time = (getValue(String(times.c_str()), '+', 6)).toInt();
+  transition_time = 60 * (getValue(String(times.c_str()), '+', 7)).toInt();
   Serial.print("Start time: ");
-  Serial.print(start_hours);
+  Serial.print(wake_hours);
   Serial.print(" : ");
-  Serial.println(start_minutes);
+  Serial.println(wake_minutes);
   Serial.print("end time: ");
-  Serial.print(end_hours);
+  Serial.print(sleep_hours);
   Serial.print(" : ");
-  Serial.println(end_minutes);
+  Serial.println(sleep_minutes);
   Serial.print("rise time: ");
   Serial.println(rise_time);
   Serial.print("fade time: ");
   Serial.println(fade_time);
   Serial.print("delay time: ");
   Serial.println(delay_time);
-  prefs.putInt("start_time", start_time);
-  prefs.putInt("end_time", end_time);
+  Serial.print("transition_time: ");
+  Serial.println(transition_time);
+  prefs.putInt("wake_time", wake_time);
+  prefs.putInt("sleep_time", sleep_time);
   prefs.putInt("rise_time", rise_time);
   prefs.putInt("fade_time", fade_time);
   prefs.putInt("delay_time", delay_time);
@@ -273,8 +350,7 @@ void handleCycleTimes(std::string times)
 #define PIRInput 34
 int pirState = LOW;
 int val = 0;
-uint32_t last_motion = 0;
-bool detected_mode = false;
+bool motion_detected = false;
 //check if there is a motion (if there is then motion brightness will be applied, otherwise it will depend on time)
 void detectMotion()
 {
@@ -283,11 +359,18 @@ void detectMotion()
   if (val == HIGH) 
   {
     //Serial.println("Detecting motion on");
-    if(pirState == LOW)
+    if(pirState == LOW){
       Serial.println("motion on");
+      pirState = HIGH;
+    }
+    if(!motion_detected)
+      first_motion = millis()/1000;
+    motion_detected = true;
+    my_now = millis()/1000;
+    if(my_now < first_motion)
+      my_now = my_now + 4294967;
+    last_motion = millis()/1000;
     actAccordingTime(true);
-    pirState = HIGH;
-    detected_mode = true;
   }
   else 
   {
@@ -296,14 +379,21 @@ void detectMotion()
     //Serial.println("Detecting motion off");
       if (pirState == HIGH) {
         Serial.println("motion off");
-        last_motion = millis()/1000;
         pirState = LOW;
       }
-      uint32_t now = millis()/1000;
-      if(now < last_motion)
-        now = now + 4294967;
-      if(now + 3 - last_motion >= delay_time)
+      my_now = millis()/1000;
+      if(my_now < last_motion)
+        my_now = my_now + 4294967;
+      if(my_now - last_motion >= delay_time){
+        motion_detected = false;
+        offset = 10 - (my_now - last_motion - delay_time);
+      }
+      if((my_now - last_motion >= delay_time + 10 && my_now - first_motion >= delay_time + 20) || last_motion == 4294967){
         actAccordingTime();
+        offset = 0;
+      }
+      else
+        actAccordingTime(true);
     }
     else if(!connecting)
       connectWithPref();
@@ -398,8 +488,8 @@ void loadPixelSettings()
 //load times settings
 void loadTimeSettings()
 {
-  start_time = prefs.getInt("start_time", 0);
-  end_time = prefs.getInt("end_time", 0);
+  wake_time = prefs.getInt("wake_time", 0);
+  sleep_time = prefs.getInt("sleep_time", 0);
   rise_time = prefs.getInt("rise_time", 0);
   fade_time = prefs.getInt("fade_time", 0);
   delay_time = prefs.getInt("delay_time", 0);
