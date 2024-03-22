@@ -8,36 +8,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../HomePage.dart';
 
 
-class StartColorPage extends StatefulWidget {
-  StartColorPage(this.c_uid, {super.key});
+class WakeColorPage extends StatefulWidget {
+  WakeColorPage(this.c_uid, {super.key});
 
   late String c_uid;
   bool isLoading = true; // Add a loading indicator
   String loadingMessage = 'Loading Data...'; // Add a loading message
 
   @override
-  State<StartColorPage> createState() => StartColorPageState();
+  State<WakeColorPage> createState() => WakeColorPageState();
 }
 
-Color currentStartColor=Colors.blue;
-bool startSaved=false;
-bool startApplied=false;
+Color wakeColor=Colors.blue;
+bool wakeSaved=false;
+bool wakeApplied=false;
 
 void _saveStartColor(Color color) async {
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  prefs.setInt('startColor', color.value);
+  prefs.setInt('wakeColor', color.value);
 }
 
 void ApplyStartColor(bool save,BuildContext context, String c_uid) {
 
-  HSVColor hsvDecode = HSVColor.fromColor(currentStartColor);
+  HSVColor hsvDecode = HSVColor.fromColor(wakeColor);
   var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
   writeDataWithCharacteristic(c_uid, data, context);
 
 }
 
-class StartColorPageState extends State<StartColorPage> {
+class WakeColorPageState extends State<WakeColorPage> {
   static const String COLOR_MODE_UUID = "c78ed52c-7a26-49ab-ba3c-c4133568a8f2";
 
   @override
@@ -47,16 +47,16 @@ class StartColorPageState extends State<StartColorPage> {
   }
 
   void _onColorChanged(HSVColor color) {
-    setState(() => currentStartColor = color.toColor());
+    setState(() => wakeColor = color.toColor());
   }
 
   void _loadColor() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int colorValue = prefs.getInt('startColor') ?? Colors.blue.value;
+    int colorValue = prefs.getInt('wakeColor') ?? Colors.blue.value;
 
     setState(() {
-      currentStartColor = Color(colorValue);
+      wakeColor = Color(colorValue);
       widget.isLoading = false; // Set loading to false after data is loaded
     });
   }
@@ -71,7 +71,7 @@ class StartColorPageState extends State<StartColorPage> {
 
   void ApplyStartColor(bool save,BuildContext context) {
 
-    HSVColor hsvDecode = HSVColor.fromColor(widget._currentStartColor);
+    HSVColor hsvDecode = HSVColor.fromColor(widget._wakeColor);
     var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
     writeDataWithCharacteristic(widget.c_uid, data, context);
 
@@ -139,13 +139,13 @@ class StartColorPageState extends State<StartColorPage> {
               : Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Please Choose Day Mode Color',
                     style: TextStyle(fontSize: 19,fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(width: 15,),
                   IconButton(
                     icon: Icon(Icons.help),
                     onPressed: () {
@@ -156,7 +156,7 @@ class StartColorPageState extends State<StartColorPage> {
               ),
               _buildHead(),
               PaletteValuePicker(
-                color: HSVColor.fromColor(currentStartColor),
+                color: HSVColor.fromColor(wakeColor),
                 onChanged: (value) => _onColorChanged(value),
               ),
               SizedBox(height: 30),
@@ -165,8 +165,8 @@ class StartColorPageState extends State<StartColorPage> {
                 children: [
               ElevatedButton(
                 onPressed: () {
-                  startApplied=true;
-                  startSaved=false;
+                  wakeApplied=true;
+                  wakeSaved=false;
                   ApplyStartColor(false,context,widget.c_uid);
                 },
                 style: ElevatedButton.styleFrom(
@@ -177,23 +177,27 @@ class StartColorPageState extends State<StartColorPage> {
               SizedBox(width: 8,),
               ElevatedButton(
                 onPressed: () {
-                  startApplied=false;
-                  startSaved=true;
-                  _saveStartColor(currentStartColor); // Save the current color
+                  wakeApplied=false;
+                  wakeSaved=true;
+                  _saveStartColor(wakeColor); // Save the current color
                   ApplyStartColor(true,context,widget.c_uid);
                   Widget okButton = TextButton(
                   child: Text("OK"),
                   onPressed: (){
                     Navigator.of(context).pop();
-                   /* Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => MyHomePage(title: 'Night Light'),)
-                    );*/
                   },
                 );
 
                 // set up the AlertDialog
                 AlertDialog alert = AlertDialog(
-                  title: Text("Day Color Settings Changed",),
+                  title: Row(
+                      children: [
+                        Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
+                        SizedBox(width: 8), // Add some space between the icon and text
+                        Text("Day Color Settings Changed",style: TextStyle(fontSize: 17),),
+                      ]
+
+                  ),
                   actions: [
                     okButton,
                   ],
@@ -243,7 +247,7 @@ Widget _buildHead() {
               border: const Border.fromBorderSide(
                 BorderSide(color: Colors.white, width: 3),
               ),
-              color: currentStartColor,
+              color: wakeColor,
             ),
           ),
         ),
@@ -253,7 +257,7 @@ Widget _buildHead() {
         // HexPicker
         Expanded(
           child: HexPicker(
-            color: currentStartColor,
+            color: wakeColor,
             onChanged: (Color value) => {},
           ),
         )

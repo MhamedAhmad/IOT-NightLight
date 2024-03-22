@@ -4,19 +4,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-//import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:nightlight/main.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-//import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-//import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'ColorsPages/StartColorPage.dart';
-import 'ColorsPages/EndColorPage.dart';
+import 'ColorsPages/WakeColorPage.dart';
+import 'ColorsPages/SleepColorPage.dart';
 import 'NavigateToBluetooth.dart';
 import 'TimeSettingsPage.dart';
 import 'WIFISettingsPage.dart';
-import 'BTConnect.dart';
-import 'InstructionsPage.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 
 Map<String, BluetoothCharacteristic?> characteristicDictionary = {};
@@ -26,8 +21,8 @@ bool exiting = false;
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.title});
-  String title;
 
+  String title;
 
 
   @override
@@ -77,8 +72,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   static const String SERVICE_UUID = "cfdfdee4-a53c-47f4-a4f1-9854017f3817";
   static const String TIME_UUID = "125f4480-415c-46e0-ab49-218377ab846a";
-  static const String START_COLOR_UUID = "81b703d5-518a-4789-8133-04cb281361c3";
-  static const String END_COLOR_UUID = "3ca69c2c-0868-4579-8fa8-91a203a5b931";
+  static const String WAKE_COLOR_UUID = "81b703d5-518a-4789-8133-04cb281361c3";
+  static const String SLEEP_COLOR_UUID = "3ca69c2c-0868-4579-8fa8-91a203a5b931";
   static const String WIFI_UUID = "006e3a0b-1a72-427b-8a00-9d03f029b9a9";
   static const String WIFI_SIGNAL_UUID = "be31c4e4-c3f7-4b6f-83b3-d9421988d355";
   static const String COLOR_MODE_UUID = "c78ed52c-7a26-49ab-ba3c-c4133568a8f2"; //todo: CHANGE THIS
@@ -88,7 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   FlutterBlue flutterBlue = FlutterBlue.instance;
   late StreamSubscription<ScanResult>? scanSubscription;
-  //late BluetoothDevice targetDevice;
   late BluetoothCharacteristic targetCharacteristic;
   String connectionText = "";
 
@@ -96,17 +90,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final List<Widget> _pages = [
     TimeSettingsPage(TIME_UUID),
-    StartColorPage(START_COLOR_UUID),
-    EndColorPage(END_COLOR_UUID),
+    WakeColorPage(WAKE_COLOR_UUID),
+    SleepColorPage(SLEEP_COLOR_UUID),
     WIFISettingsPage(WIFI_UUID),
   ];
 
   Future<void> _onItemTapped(int index) async {
-    print('here');
     if ((_selectedIndex == 1 && index != 1)) {
-      if(startSaved==false && startApplied==true) {
-        startApplied = false;
-        showWarningDialog('StartColorPage', index);
+      if(wakeSaved==false && wakeApplied==true) {
+        wakeApplied = false;
+        showWarningDialog('WakeColorPage', index);
       }
       if(index != 2){
         var data = '${0}';
@@ -118,12 +111,10 @@ class _MyHomePageState extends State<MyHomePage> {
         await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
       }
     }else if((_selectedIndex == 2 && index != 2)){
-      if(endSaved==false && endApplied==true) {
-        endApplied = false;
+      if(sleepSaved==false && sleepApplied==true) {
+        sleepApplied = false;
         showWarningDialog('EndColorPage', index);
       }
-      print('here11');
-      print('here11');
       if(index != 1){
         var data = '${0}';
         await writeDataWithCharacteristic(COLOR_MODE_UUID, data, context);
@@ -145,7 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void showWarningDialog(String pageName, int index) {
-    print('snflkd');
     Widget saveButton = TextButton(
       child: Row(
         children: [
@@ -158,14 +148,14 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       onPressed: () {
-        if (pageName == 'StartColorPage') {
-          startApplied = false;
-          startSaved = true;
-          saveStartChanges(true, context, START_COLOR_UUID, currentStartColor);
+        if (pageName == 'WakeColorPage') {
+          wakeApplied = false;
+          wakeSaved = true;
+          saveWakeChanges(true, context, WAKE_COLOR_UUID, wakeColor);
         } else {
-          endApplied = false;
-          endSaved = true;
-          saveEndChanges(true, context, END_COLOR_UUID, motionDetectionValue, currentEndColor);
+          sleepApplied = false;
+          sleepSaved = true;
+          saveSleepChanges(true, context, SLEEP_COLOR_UUID, motionDetectionValue, sleepColor);
         }
         Navigator.of(context).pop();
       },
@@ -183,12 +173,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       onPressed: () {
-        if (pageName == 'StartColorPage') {
-          startApplied = false;
-          startSaved = true;
+        if (pageName == 'WakeColorPage') {
+          wakeApplied = false;
+          wakeSaved = true;
         } else {
-          endApplied = false;
-          endSaved = true;
+          sleepApplied = false;
+          sleepSaved = true;
         }
 
         Navigator.of(context).pop();
@@ -197,8 +187,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     AlertDialog alert = AlertDialog(
-      title: Text("Alert",),
-      content: Text("Do you want to save your changes before leaving?"),
+      //title: Text("Alert",),
+      content: Text("Do you want to save your changes before leaving?",style: TextStyle(fontSize: 16),),
       actions: [
         saveButton,
         discardButton,
@@ -207,6 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return alert;
@@ -216,28 +207,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-  Future<void> saveStartChanges(bool save,BuildContext context, String c_uid,Color color) async {
+  Future<void> saveWakeChanges(bool save,BuildContext context, String c_uid,Color color) async {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setInt('startColor', color.value);
+      prefs.setInt('wakeColor', color.value);
 
-      print(color);
-
-      HSVColor hsvDecode = HSVColor.fromColor(currentStartColor);
+      HSVColor hsvDecode = HSVColor.fromColor(wakeColor);
       var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
       writeDataWithCharacteristic(c_uid, data, context);
 
   }
 
-  Future<void> saveEndChanges(bool save,BuildContext context, String c_uid,double motionDetectionValue ,Color color) async {
+  Future<void> saveSleepChanges(bool save,BuildContext context, String c_uid,double motionDetectionValue ,Color color) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('endColor', color.value);
+    prefs.setInt('sleepColor', color.value);
     prefs.setDouble('motionDetectionValue', motionDetectionValue);
-    print('ahc');
     print(motionDetectionValue);
 
-    HSVColor hsvDecode = HSVColor.fromColor(currentEndColor);
+    HSVColor hsvDecode = HSVColor.fromColor(sleepColor);
     var data =
         '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}+${motionDetectionValue}';
     writeDataWithCharacteristic(c_uid, data, context);
@@ -248,37 +236,61 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Column(
-          children: [
-            Expanded(
-              child: _pages[_selectedIndex],
-            ),
-          ],
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => myProvider())
+      ],
+      child: PopScope(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Column(
+            children: [
+              Expanded(
+                child: _pages[_selectedIndex],
+              ),
+            ],
+          ),
+          bottomNavigationBar: Builder(
+            builder: (context) {
+              return ConvexAppBar(
+                style: TabStyle.reactCircle,
+                color: Colors.white,
+                backgroundColor: Colors.teal.shade800,
+                items: [
+                  TabItem(
+                    icon: (context.watch<myProvider>().timeConfigured ||
+                        context.watch<myProvider>().timeManConfigured)
+                        ? Icons.timer_outlined
+                        : Icons.timer_off_outlined,
+                    title: 'Time',
+                  ),
+                  TabItem(icon: Icons.sunny, title: 'Day Mode'),
+                  TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
+                  TabItem(
+                    icon: context.watch<myProvider>().wifiConnected
+                        ? Icons.wifi
+                        : Icons.wifi_off,
+                    title: 'WiFi',
+                  ),
+                ],
+                onTap: _onItemTapped,
+              );
+            },
+          ),
+
         ),
-        bottomNavigationBar: ConvexAppBar(
-          style: TabStyle.reactCircle,
-          color: Colors.white,
-          backgroundColor: Colors.teal.shade800,
-          items: [
-            TabItem(icon: (configured || manually_configured) ? Icons.timer_outlined : Icons.timer_off_outlined, title: 'Time'),
-            TabItem(icon: Icons.sunny, title: 'Day Mode'),
-            TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
-            TabItem(icon: wifi_connected ? Icons.wifi : Icons.wifi_off, title: 'WiFi'),
-          ],
-          onTap: _onItemTapped,
-        ),
-      ),
-      canPop: false,
-      onPopInvoked: (bool didPop) {
-        if (didPop)
-          return;
-        _onBackButtonPressed(context);
-      },
+
+        canPop: false,
+        onPopInvoked: (bool didPop) {
+          if (didPop)
+            return;
+          _onBackButtonPressed(context);
+        }
+
+    ),
     );
   }
+
 
 
     Future<void> _onBackButtonPressed(BuildContext context) async{

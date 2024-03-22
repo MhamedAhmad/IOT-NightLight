@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:provider/provider.dart';
 import 'BTConnect.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
 import 'WIFISettingsPage.dart';
+
 /*
 void main() {
   runApp(const MyApp());
@@ -15,16 +17,17 @@ bool popup = false;
 bool escaped = false;
 void main() {
   runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Night Light',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-        fontFamily: 'Alef'
-      ),
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Night Light',
+        theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+            useMaterial3: true,
+            fontFamily: 'Alef'
+        ),
         home: StartPage(),
-    ),
+        //home: MyHomePage(title: 'Night light'),
+      ),
   );
 }
 class StartPage extends StatefulWidget {
@@ -74,9 +77,8 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    if(exiting)
-    {
-      if(initialized)
+    if (exiting) {
+      if (initialized)
         await targetDevice.disconnect();
       connected = false;
       exiting = false;
@@ -100,7 +102,7 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
             },);
             bool this_connected = false;
             Future.delayed(const Duration(milliseconds: 5000), () async {
-              if(!this_connected) {
+              if (!this_connected) {
                 escaped = true;
                 Navigator.of(context).pop();
               }
@@ -109,7 +111,7 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
             await discoverServices();
             connected = true;
             this_connected = true;
-            if(!escaped)
+            if (!escaped)
               Navigator.of(context).pop();
             else
               escaped = false;
@@ -149,5 +151,5 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return BluetoothButtonPage();
   }
-
 }
+

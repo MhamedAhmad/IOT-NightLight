@@ -5,7 +5,28 @@ import 'package:nightlight/SeekWifiMessage.dart';
 import 'package:nightlight/main.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
+import 'package:provider/provider.dart'; // Import Provider package
 
+class myProvider extends ChangeNotifier {
+  bool wifiConnected = false;
+  bool timeConfigured = false;
+  bool timeManConfigured = false;
+
+  void updateWiFiStatus(bool isConnected) async {
+    wifiConnected = isConnected;
+    notifyListeners(); // Notify listeners of the change
+  }
+
+  void updateTimeConfigured(bool isConfigured) async {
+    timeConfigured = isConfigured;
+    notifyListeners(); // Notify listeners of the change
+  }
+  void updateTimeManConfigured(bool isConfigured) async {
+    timeManConfigured = isConfigured;
+    notifyListeners(); // Notify listeners of the change
+  }
+
+}
 
 
 class WIFISettingsPage extends StatefulWidget {
@@ -47,6 +68,17 @@ Future<int> receiveDataFromESP(String UUID) async {
 }
 
 class _WIFISettingsPageState extends State<WIFISettingsPage> {
+
+
+  void updateWiFiStatus(bool isConnected) {
+    Provider.of<myProvider>(context, listen: false)
+        .updateWiFiStatus(isConnected);
+  }
+
+  void updateTimeConfigured(bool isConfigured) {
+    Provider.of<myProvider>(context, listen: false)
+        .updateTimeConfigured(isConfigured);
+  }
 
   void _showInstructions() {
     showDialog(
@@ -202,7 +234,8 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        manually_configured = true;
+                                        context.read<myProvider>().updateTimeManConfigured(true);
+                                        //manually_configured = true;
                                         Navigator.of(context).pop();
                                       },
                                       child: Text("OK"),
@@ -245,7 +278,8 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               }
               else if(x == 2)
               {
-                wifi_connected = true;
+                context.read<myProvider>().updateWiFiStatus(true);
+                //wifi_connected = true;
                 Navigator.of(context).pop();
                 showDialog(
                     context: context,
@@ -272,7 +306,8 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                                     actions: [
                                       TextButton(
                                         onPressed: () {
-                                          manually_configured = true;
+                                          context.read<myProvider>().updateTimeManConfigured(true);
+                                          //manually_configured = true;
                                           Navigator.of(context).pop();
                                         },
                                         child: Text("OK"),
@@ -287,8 +322,10 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               }
               else if (x == 3)
               {
-                wifi_connected = true;
-                configured = true;
+                //wifi_connected = true;
+                //configured = true;
+                context.read<myProvider>().updateWiFiStatus(true);
+                context.read<myProvider>().updateTimeConfigured(true);
                 Navigator.of(context).pop();
                 // set up the button
                 Widget okButton = TextButton(
@@ -380,7 +417,10 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                   // set up the button
                   Widget okButton = TextButton(
                     child: Text("OK"),
-                    onPressed: () {Navigator.of(context).pop();popup=false;},
+                    onPressed: () {
+                      Navigator.of(context).pop();popup=false;
+                      },
+
                   );
 
                   // set up the AlertDialog
@@ -403,7 +443,9 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               }
               //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SeekWifiMessage()));
             }, style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal.shade800,),
+              backgroundColor: Colors.teal.shade800,
+              minimumSize: Size(200, 40),
+            ),
                 child: Text('Connect to Wifi',style: TextStyle(color: Colors.white),))
           ],
         ),

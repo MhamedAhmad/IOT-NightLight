@@ -45,6 +45,8 @@ dependencies:
   google_fonts: ^6.2.1
   percent_indicator: ^4.2.3
   permission_handler: ^11.2.0
+  provider: ^6.1.2
+  widget_zoom: ^0.0.4
   #flutter_blue_plus: ^1.31.13
   #flutter_reactive_ble: ^5.3.1
 
