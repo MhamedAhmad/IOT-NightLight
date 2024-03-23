@@ -75,6 +75,7 @@ void light(float fraction, byte mode, bool motion=false)
   {
     bot_hue = low_hue;
     top_hue = low_hue;
+    bot_sat = low_saturation;
     top_sat = low_saturation;
     top_val = low_value;
   }
@@ -92,6 +93,7 @@ void light(float fraction, byte mode, bool motion=false)
     bot_hue = high_hue;
     top_hue = high_hue;
     bot_sat = high_saturation;
+    top_sat = high_saturation;
     bot_val = high_value;
   }
   if(motion)
@@ -99,8 +101,10 @@ void light(float fraction, byte mode, bool motion=false)
     hue = low_hue;
     sat = low_saturation;
     val = motion_value;
-    if(my_now + offset < first_motion + 10)
-      val = ((my_now+ offset -first_motion)/(float)10) * motion_value + (1-((my_now+ offset -first_motion)/(float)10)) * low_value;
+    if(my_now < first_motion + 10){
+      val = ((my_now -first_motion)/(float)10) * motion_value + (1-((my_now -first_motion)/(float)10)) * low_value;
+      last_motion = my_now;
+    }
     else if(my_now > last_motion + delay_time && my_now <= last_motion + delay_time + 10)
       val = ((my_now -(last_motion + delay_time))/(float)10) * low_value + (1-((my_now -(last_motion + delay_time))/(float)10)) * motion_value;
   }
@@ -170,8 +174,8 @@ const long  gmtOffset_sec = 7200;
 const int   daylightOffset_sec = 3600;
 int wake_time = 0;
 int sleep_time = 0;
-int rise_time = 0;
-int fade_time = 0;
+int fade_in_time = 0;
+int fade_out_time = 0;
 int transition_time = 0;
 //configure time using time sent by user
 void handleTimeConfig(std::string curr_time)
@@ -212,14 +216,14 @@ void actAccordingTime(bool motion = false)
       light(0, 2);
     else if(time == sleep_time)
       light(1, 0, motion);
-    else if(time > wake_time && time < wake_time + fade_time)
-      light((time-wake_time)/(float)fade_time, 2);
-    else if(time >= wake_time + fade_time && time < sleep_time)
+    else if(time > wake_time && time < wake_time + fade_out_time)
+      light((time-wake_time)/(float)fade_out_time, 2);
+    else if(time >= wake_time + fade_out_time && time < sleep_time)
     {
-      if(time < sleep_time - rise_time)
+      if(time < sleep_time - fade_in_time)
         light(1, 2);
       else
-        light((time - (sleep_time - rise_time))/(float)rise_time, 0);
+        light((time - (sleep_time - fade_in_time))/(float)fade_in_time, 0);
     }
     else if(time >= sleep_time)
     {
@@ -262,45 +266,45 @@ void actAccordingTime(bool motion = false)
       light((time-(wake_time - transition_time))/(float)transition_time, 1);
     else if(time >= wake_time)
     {
-      if(wake_time + fade_time >= 24 * 3600)
-        light((time-wake_time)/(float)fade_time, 2);
-      else if(sleep_time > rise_time)
+      if(wake_time + fade_out_time >= 24 * 3600)
+        light((time-wake_time)/(float)fade_out_time, 2);
+      else if(sleep_time > fade_in_time)
       {
-        if(time > wake_time + fade_time)
+        if(time > wake_time + fade_out_time)
           light(1, 2);
         else
-          light((time-wake_time)/(float)fade_time, 2);
+          light((time-wake_time)/(float)fade_out_time, 2);
       }
       else
       {
-        if(time <= wake_time + fade_time)
-          light((time-wake_time)/(float)fade_time, 2);
-        else if(time <= sleep_time - rise_time + 24 * 3600)
+        if(time <= wake_time + fade_out_time)
+          light((time-wake_time)/(float)fade_out_time, 2);
+        else if(time <= sleep_time - fade_in_time + 24 * 3600)
           light(1, 2);
         else
-          light((time-(sleep_time - rise_time + 24 * 3600))/(float)rise_time, 0);
+          light((time-(sleep_time - fade_in_time + 24 * 3600))/(float)fade_in_time, 0);
       }
     }
     else
     {
-      if(wake_time + fade_time >= 24 * 3600)
+      if(wake_time + fade_out_time >= 24 * 3600)
       {
-        if(time <= wake_time + fade_time - 24 * 3600)
-          light((time-(wake_time - 24 * 3600))/(float)fade_time, 2);
-        else if(time <= sleep_time - rise_time)
+        if(time <= wake_time + fade_out_time - 24 * 3600)
+          light((time-(wake_time - 24 * 3600))/(float)fade_out_time, 2);
+        else if(time <= sleep_time - fade_in_time)
           light(0, 0);
         else
-          light((time-(sleep_time - rise_time))/(float)rise_time, 0);
+          light((time-(sleep_time - fade_in_time))/(float)fade_in_time, 0);
       }
-      else if(sleep_time > rise_time)
+      else if(sleep_time > fade_in_time)
       {
-        if(time <= sleep_time - rise_time)
+        if(time <= sleep_time - fade_in_time)
           light(0, 0);
         else
-          light((time-(sleep_time - rise_time))/(float)rise_time, 0);
+          light((time-(sleep_time - fade_in_time))/(float)fade_in_time, 0);
       }
       else
-        light((time-(sleep_time - rise_time + 24 * 3600))/(float)rise_time, 0);
+        light((time-(sleep_time - fade_in_time + 24 * 3600))/(float)fade_in_time, 0);
     }
   }
 }
@@ -313,9 +317,9 @@ void handleCycleTimes(std::string times)
   int sleep_hours = (getValue(String(times.c_str()), '+', 0)).toInt();
   int sleep_minutes = (getValue(String(times.c_str()), '+', 1)).toInt();
   sleep_time = sleep_hours * 3600 + sleep_minutes * 60;
-  rise_time = 60 * (getValue(String(times.c_str()), '+', 4)).toInt();
-  fade_time = 60 * (getValue(String(times.c_str()), '+', 5)).toInt();
-  delay_time = (getValue(String(times.c_str()), '+', 6)).toInt();
+  fade_in_time = 60 * (getValue(String(times.c_str()), '+', 5)).toInt();
+  fade_out_time = 60 * (getValue(String(times.c_str()), '+', 4)).toInt();
+  delay_time = 60 * (getValue(String(times.c_str()), '+', 6)).toInt();
   transition_time = 60 * (getValue(String(times.c_str()), '+', 7)).toInt();
   Serial.print("Start time: ");
   Serial.print(wake_hours);
@@ -325,19 +329,20 @@ void handleCycleTimes(std::string times)
   Serial.print(sleep_hours);
   Serial.print(" : ");
   Serial.println(sleep_minutes);
-  Serial.print("rise time: ");
-  Serial.println(rise_time);
-  Serial.print("fade time: ");
-  Serial.println(fade_time);
+  Serial.print("fade in time: ");
+  Serial.println(fade_in_time);
+  Serial.print("fade out time: ");
+  Serial.println(fade_out_time);
   Serial.print("delay time: ");
   Serial.println(delay_time);
   Serial.print("transition_time: ");
   Serial.println(transition_time);
   prefs.putInt("wake_time", wake_time);
   prefs.putInt("sleep_time", sleep_time);
-  prefs.putInt("rise_time", rise_time);
-  prefs.putInt("fade_time", fade_time);
+  prefs.putInt("fade_in_time", fade_in_time);
+  prefs.putInt("fade_out_time", fade_out_time);
   prefs.putInt("delay_time", delay_time);
+  prefs.putInt("transition_time", transition_time);
 }
 //------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------
@@ -364,7 +369,7 @@ void detectMotion()
       pirState = HIGH;
     }
     if(!motion_detected)
-      first_motion = millis()/1000;
+      first_motion = millis()/1000 - offset;
     motion_detected = true;
     my_now = millis()/1000;
     if(my_now < first_motion)
@@ -490,9 +495,10 @@ void loadTimeSettings()
 {
   wake_time = prefs.getInt("wake_time", 0);
   sleep_time = prefs.getInt("sleep_time", 0);
-  rise_time = prefs.getInt("rise_time", 0);
-  fade_time = prefs.getInt("fade_time", 0);
+  fade_in_time = prefs.getInt("fade_in_time", 0);
+  fade_out_time = prefs.getInt("fade_out_time", 0);
   delay_time = prefs.getInt("delay_time", 0);
+  transition_time = prefs.getInt("transition_time", 0);
   detectMotion();
 }
 //------------------------------------------------------------------------------------------------------
