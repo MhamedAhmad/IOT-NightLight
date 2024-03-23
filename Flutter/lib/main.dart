@@ -13,11 +13,37 @@ void main() {
   runApp(const MyApp());
 }
 */
+class myProvider extends ChangeNotifier {
+  bool wifiConnected = false;
+  bool timeConfigured = false;
+  bool timeManConfigured = false;
+
+  void updateWiFiStatus(bool isConnected) async {
+    wifiConnected = isConnected;
+    notifyListeners(); // Notify listeners of the change
+  }
+
+  void updateTimeConfigured(bool isConfigured) async {
+    timeConfigured = isConfigured;
+    notifyListeners(); // Notify listeners of the change
+  }
+  void updateTimeManConfigured(bool isConfigured) async {
+    timeManConfigured = isConfigured;
+    notifyListeners(); // Notify listeners of the change
+  }
+
+}
+
 bool popup = false;
 bool escaped = false;
 void main() {
   runApp(
-      MaterialApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => myProvider())
+        ],
+        child:
+        MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Night Light',
         theme: ThemeData(
@@ -28,7 +54,7 @@ void main() {
         home: StartPage(),
         //home: MyHomePage(title: 'Night light'),
       ),
-  );
+  ));
 }
 class StartPage extends StatefulWidget {
   const StartPage({super.key}) ;
@@ -62,7 +88,19 @@ class StartPage extends StatefulWidget {
   }
 
 class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
+  void updateWiFiStatus(bool isConnected) {
+    Provider.of<myProvider>(context, listen: false)
+        .updateWiFiStatus(isConnected);
+  }
 
+  void updateTimeConfigured(bool isConfigured) {
+    Provider.of<myProvider>(context, listen: false)
+        .updateTimeConfigured(isConfigured);
+  }
+  void updateTimeManConfigured(bool isConfigured) {
+    Provider.of<myProvider>(context, listen: false)
+        .updateTimeManConfigured(isConfigured);
+  }
   @override
   void initState() {
     super.initState();
@@ -108,7 +146,7 @@ class _MyAppState extends State<StartPage> with WidgetsBindingObserver {
               }
             });
             await targetDevice.connect(autoConnect: true);
-            await discoverServices();
+            await discoverServices(context);
             connected = true;
             this_connected = true;
             if (!escaped)

@@ -7,27 +7,6 @@ import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
 import 'package:provider/provider.dart'; // Import Provider package
 
-class myProvider extends ChangeNotifier {
-  bool wifiConnected = false;
-  bool timeConfigured = false;
-  bool timeManConfigured = false;
-
-  void updateWiFiStatus(bool isConnected) async {
-    wifiConnected = isConnected;
-    notifyListeners(); // Notify listeners of the change
-  }
-
-  void updateTimeConfigured(bool isConfigured) async {
-    timeConfigured = isConfigured;
-    notifyListeners(); // Notify listeners of the change
-  }
-  void updateTimeManConfigured(bool isConfigured) async {
-    timeManConfigured = isConfigured;
-    notifyListeners(); // Notify listeners of the change
-  }
-
-}
-
 
 class WIFISettingsPage extends StatefulWidget {
   WIFISettingsPage(this.c_uid, {super.key});
@@ -68,17 +47,6 @@ Future<int> receiveDataFromESP(String UUID) async {
 }
 
 class _WIFISettingsPageState extends State<WIFISettingsPage> {
-
-
-  void updateWiFiStatus(bool isConnected) {
-    Provider.of<myProvider>(context, listen: false)
-        .updateWiFiStatus(isConnected);
-  }
-
-  void updateTimeConfigured(bool isConfigured) {
-    Provider.of<myProvider>(context, listen: false)
-        .updateTimeConfigured(isConfigured);
-  }
 
   void _showInstructions() {
     showDialog(
@@ -202,7 +170,14 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
               widget.password = '';
               writeDataWithCharacteristic(widget.c_uid,data,context);
               showDialog(context: context, builder: (context) {
-                return Center(child: CircularProgressIndicator());
+                Future.delayed(const Duration(seconds: 10), () async {
+                  return -10;
+                });
+                return PopScope(child: Center(child: CircularProgressIndicator()),
+                  canPop: false,
+                  onPopInvoked: (bool didPop) {
+                    return;
+                  },);
               },);
               int x = await receiveDataFromESP("be31c4e4-c3f7-4b6f-83b3-d9421988d355");
               if(x == 0)

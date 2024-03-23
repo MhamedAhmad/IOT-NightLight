@@ -236,11 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => myProvider())
-      ],
-      child: PopScope(
+    return PopScope(
         child: Scaffold(
           backgroundColor: Colors.white,
           body: Column(
@@ -286,8 +282,6 @@ class _MyHomePageState extends State<MyHomePage> {
             return;
           _onBackButtonPressed(context);
         }
-
-    ),
     );
   }
 

@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:nightlight/WIFISettingsPage.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 import 'BTConnect.dart';
 import 'HomePage.dart';
+import 'main.dart';
 
 late BluetoothDevice targetDevice;
 late BluetoothCharacteristic targetCharacteristic;
@@ -25,15 +27,15 @@ class BluetoothButtonPage extends StatefulWidget {
   State<BluetoothButtonPage> createState() => _BluetoothButtonPageState();
 }
 
-connectToDevice() async {
+connectToDevice(BuildContext context) async {
   if (targetDevice == null) {
     return;
   }
   await targetDevice.connect(autoConnect: true);
-  discoverServices();
+  discoverServices(context);
 }
 
-discoverServices() async {
+discoverServices(BuildContext context) async {
   if (targetDevice == null) {
     return;
   }
@@ -53,7 +55,7 @@ discoverServices() async {
         fast_reload = false;
         await Future.delayed(const Duration(milliseconds:1500));
         if(!fast_reload) {
-          manually_configured = false;
+          context.read<myProvider>().updateTimeManConfigured(false);
         }
       }
       else if(s == BluetoothDeviceState.connected)
@@ -66,29 +68,29 @@ discoverServices() async {
     {
       int x = event[0];
       if (x == 0) {
-        wifi_connected = false;
-        configured = false;
-        manually_configured = false;
+        context.read<myProvider>().updateWiFiStatus(false);
+        context.read<myProvider>().updateTimeConfigured(false);
+        context.read<myProvider>().updateTimeManConfigured(false);
       }
       else if (x == 1) {
-        wifi_connected = false;
-        configured = false;
-        manually_configured = true;
+        context.read<myProvider>().updateWiFiStatus(false);
+        context.read<myProvider>().updateTimeConfigured(false);
+        context.read<myProvider>().updateTimeManConfigured(true);
       }
       else if (x == 2) {
-        wifi_connected = true;
-        configured = false;
-        manually_configured = false;
+        context.read<myProvider>().updateWiFiStatus(true);
+        context.read<myProvider>().updateTimeConfigured(false);
+        context.read<myProvider>().updateTimeManConfigured(false);
       }
       else if (x == 3) {
-        wifi_connected = true;
-        configured = true;
-        manually_configured = false;
+        context.read<myProvider>().updateWiFiStatus(true);
+        context.read<myProvider>().updateTimeConfigured(true);
+        context.read<myProvider>().updateTimeManConfigured(false);
       }
       else if (x == 5) {
-        wifi_connected = true;
-        configured = false;
-        manually_configured = true;
+        context.read<myProvider>().updateWiFiStatus(true);
+        context.read<myProvider>().updateTimeConfigured(false);
+        context.read<myProvider>().updateTimeManConfigured(true);
       }
     }
   });
@@ -163,7 +165,7 @@ showDialog(context: context, builder: (context) {
               if (scanResult.device.name.contains("NightLightIOT")) {
                 targetDevice = scanResult.device;
                 initialized = true;
-                await connectToDevice();
+                await connectToDevice(context);
               }
             });
             for(int i=0; i <10; i++)
