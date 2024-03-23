@@ -70,18 +70,13 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     DateTime now = DateTime.now();
     DateTime startTime = DateTime(
         now.year, now.month, now.day, widget._startTime!.hour,
-        widget._startTime!.minute);
+        widget._startTime!.minute).subtract(Duration(minutes: widget.fadeIn));
     DateTime fadeInEndTime = DateTime(
-      startTime.year,
-      startTime.month,
-      startTime.day,
-      (startTime.hour * 60 + startTime.minute - widget.fadeIn) ~/ 60,
-      // Extracting hours
-      (startTime.hour * 60 + startTime.minute - widget.fadeIn) %
-          60, // Extracting minutes
-    );
-
-    return now.isBefore(startTime) && now.isAfter(fadeInEndTime);
+        now.year, now.month, now.day, widget._startTime!.hour,
+        widget._startTime!.minute);
+    if(!now.isBefore(fadeInEndTime))
+      now = now.subtract(Duration(days: 1));
+    return now.isAfter(startTime);
   }
 
   bool get _isNightMode {
@@ -89,20 +84,14 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     DateTime startTime = DateTime(
         now.year, now.month, now.day, widget._startTime!.hour,
         widget._startTime!.minute);
-    DateTime endTime = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute);
     DateTime tranistion = DateTime(
-      endTime.year,
-      endTime.month,
-      endTime.day,
-      (endTime.hour * 60 + endTime.minute - widget.transitionTime) ~/ 60,
-      // Extracting hours
-      (endTime.hour * 60 + endTime.minute - widget.transitionTime) %
-          60, // Extracting minutes
-    );
-
-    return now.isBefore(tranistion) && now.isAfter(startTime);
+        now.year, now.month, now.day, widget._endTime!.hour,
+        widget._endTime!.minute).subtract(Duration(minutes: widget.transitionTime));
+    if(!tranistion.isAfter(startTime))
+      tranistion = tranistion.add(Duration(days: 1));
+    if(!now.isAfter(startTime))
+      now = now.add(Duration(days: 1));
+    return now.isBefore(tranistion);
   }
 
   bool get _isTransitioning {
@@ -111,15 +100,11 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         now.year, now.month, now.day, widget._endTime!.hour,
         widget._endTime!.minute);
     DateTime tranistion = DateTime(
-      endTime.year,
-      endTime.month,
-      endTime.day,
-      (endTime.hour * 60 + endTime.minute - widget.transitionTime) ~/ 60,
-      // Extracting hours
-      (endTime.hour * 60 + endTime.minute - widget.transitionTime) %
-          60, // Extracting minutes
-    );
-    return now.isBefore(endTime) && now.isAfter(tranistion);
+        now.year, now.month, now.day, widget._endTime!.hour,
+        widget._endTime!.minute).subtract(Duration(minutes: widget.transitionTime));
+    if(!now.isBefore(endTime))
+      now = now.subtract(Duration(days: 1));
+    return now.isAfter(tranistion);
   }
 
   bool get _isFadingOut {
@@ -128,18 +113,11 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         now.year, now.month, now.day, widget._endTime!.hour,
         widget._endTime!.minute);
     DateTime fadeOutEndTime = DateTime(
-      endTime.year,
-      endTime.month,
-      endTime.day,
-      (endTime.hour * 60 + endTime.minute + widget.fadeOut) ~/ 60,
-      // Extracting hours
-      (endTime.hour * 60 + endTime.minute + widget.fadeOut) %
-          60, // Extracting minutes
-    );
-    print(fadeOutEndTime);
-
-
-    return now.isAfter(endTime) && now.isBefore(fadeOutEndTime);
+        now.year, now.month, now.day, widget._endTime!.hour,
+        widget._endTime!.minute).add(Duration(minutes: widget.fadeOut));
+    if(!now.isAfter(endTime))
+      now = now.add(Duration(days: 1));
+    return now.isBefore(fadeOutEndTime);
   }
 
 
@@ -193,15 +171,23 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     }
 
     DateTime now = DateTime.now();
+    DateTime temp = DateTime(
+        now.year, now.month, now.day, widget._startTime!.hour,
+        widget._startTime!.minute);
     DateTime startTime = DateTime(
         now.year, now.month, now.day, widget._startTime!.hour,
         widget._startTime!.minute)
         .subtract(Duration(minutes: widget.fadeIn));
+    if(!startTime.isAfter(temp))
+      startTime = startTime.add(Duration(days: 1));
     DateTime endTimeWithFadeOut = DateTime(
         now.year, now.month, now.day, widget._endTime!.hour,
         widget._endTime!.minute)
         .add(Duration(minutes: widget.fadeOut));
-
+    if(!now.isAfter(startTime))
+      now = now.add(Duration(days: 1));
+    if(!endTimeWithFadeOut.isAfter(startTime))
+      endTimeWithFadeOut = endTimeWithFadeOut.add(Duration(days: 1));
     Duration totalDuration = endTimeWithFadeOut.difference(startTime);
     Duration elapsedTime = now.difference(startTime);
     double progress = elapsedTime.inMilliseconds / totalDuration.inMilliseconds;
