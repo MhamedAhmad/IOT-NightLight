@@ -113,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }else if((_selectedIndex == 2 && index != 2)){
       if(sleepSaved==false && sleepApplied==true) {
         sleepApplied = false;
-        showWarningDialog('EndColorPage', index);
+        showWarningDialog('SleepColorPage', index);
       }
       if(index != 1){
         var data = '${0}';
@@ -223,7 +223,6 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('sleepColor', color.value);
     prefs.setDouble('motionDetectionValue', motionDetectionValue);
-    print(motionDetectionValue);
 
     HSVColor hsvDecode = HSVColor.fromColor(sleepColor);
     var data =

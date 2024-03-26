@@ -45,7 +45,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   void _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
-        _progress = _calculateProgress();
+          _progress = _calculateProgress();
       });
     });
   }
@@ -232,6 +232,10 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     return availableTime.clamp(0, 120);
   }
 
+  int limitDelay(){
+  return 10;
+  }
+
   int limitFade() {
     // Convert string times to DateTime objects
     if (widget._startTime == null || widget._endTime == null) return 0;
@@ -269,8 +273,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       widget.delayTime = prefs.getInt('delayTime') ?? 0;
       widget.fadeOut = prefs.getInt('fadeOut') ?? 0;
       widget.fadeIn = prefs.getInt('fadeIn') ?? 0;
-      sleepColor = Color(prefs.getInt('sleepColor') ?? Colors.blue.value);
-      wakeColor = Color(prefs.getInt('wakeColor') ?? Colors.blue.value);
+      //sleepColor = Color(prefs.getInt('sleepColor') ?? Colors.blue.value);
+      //wakeColor = Color(prefs.getInt('wakeColor') ?? Colors.blue.value);
       widget.transitionTime = prefs.getInt('transitionTime') ?? 0;
       widget.isLoading = false;
     });
@@ -569,17 +573,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                   ),
                 ),
                 trailing:
-                Container(
-                  width: 60,
-                  /*decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey, // Set border color
-                      width: 1.0, // Set border width
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(4.0), // Adjust border radius as needed
-                    ),
-                  ),*/
+                SizedBox(
+                  width: 100,
 
                   child: DropdownButton<int>(
                     value: min(
@@ -594,7 +589,14 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,
-                          child: Text(index.toString()),
+                          child: Row( // Wrap the text in a Row to include the "min" label
+                            children: [
+                              Text(index.toString()), // Display the value
+                              SizedBox(width: 4), // Add some spacing between value and label
+                              Text('min'),
+// Display the label "min"
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -636,17 +638,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                trailing: Container(
-                  width: 60,
-                  /*decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey, // Set border color
-                      width: 1.0, // Set border width
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(4.0), // Adjust border radius as needed
-                    ),
-                  ),*/
+                trailing: SizedBox(
+                  width: 100,
                   child:
                   DropdownButton<int>(
                     value: min(
@@ -661,7 +654,15 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,
-                          child: Text(index.toString()),
+                          child: Row( // Wrap the text in a Row to include the "min" label
+                            children: [
+                              Text(index.toString()), // Display the value
+                              SizedBox(width: 4), // Add some spacing between value and label
+                              Text('min'),
+
+                              // Display the label "min"
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -673,7 +674,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     // Adjust dropdown background color
                     elevation: 4,
                     // Adjust elevation
-                    icon: Icon(Icons.arrow_drop_down),
+                    //icon: Icon(Icons.arrow_drop_down),
                     // Customize dropdown icon
                     iconSize: 24.0,
                     // Adjust icon size
@@ -688,6 +689,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               ),
               SizedBox(height: 25,),
               ListTile(
+
                 leading: Container(padding: EdgeInsets.all(5),
                   decoration: BoxDecoration(
                       shape: BoxShape.circle, color: Colors.teal.shade800),
@@ -701,17 +703,9 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     fontFamily: 'Alef',
                   ),
                 ),
-                trailing: Container(
-                  width: 60,
-                  /*decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey, // Set border color
-                      width: 1.0, // Set border width
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(4.0), // Adjust border radius as needed
-                    ),
-                  ),*/
+                trailing:
+                SizedBox(
+                  width: 100,
                   child: DropdownButton<int>(
                     value: min(widget.transitionTime, limitTrans()),
                     onChanged: (int? newValue) {
@@ -724,7 +718,13 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,
-                          child: Text(index.toString()),
+                          child: Row( // Wrap the text in a Row to include the "min" label
+                        children: [
+                        Text(index.toString()), // Display the value
+                            SizedBox(width: 4), // Add some spacing between value and label
+                            Text('min'), // Display the label "min"
+                            ],
+                            ),
                         );
                       },
                     ),
@@ -751,10 +751,16 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               ),
               SizedBox(height: 25,),
               ListTile(
-                leading: Container(padding: EdgeInsets.all(5),
+                leading: Container(
+                  padding: EdgeInsets.all(5),
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle, color: Colors.teal.shade800),
-                  child: Icon(Icons.directions_walk, color: Colors.white,),
+                    shape: BoxShape.circle,
+                    color: Colors.teal.shade800,
+                  ),
+                  child: Icon(
+                    Icons.directions_walk,
+                    color: Colors.white,
+                  ),
                 ),
                 title: Text(
                   'Motion Delay Time',
@@ -764,17 +770,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                     fontFamily: 'Alef',
                   ),
                 ),
-                trailing: Container(
-                  width: 60,
-                  /*decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey, // Set border color
-                      width: 1.0, // Set border width
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(4.0), // Adjust border radius as needed
-                    ),
-                  ),*/
+                trailing: SizedBox(
+                  width: 100, // Adjust the width to fit the DropdownButton
                   child: DropdownButton<int>(
                     value: widget.delayTime,
                     onChanged: (int? newValue) {
@@ -783,40 +780,46 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       });
                     },
                     items: List.generate(
-                      11,
+                      limitDelay() + 1,
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,
-                          child: Text(index.toString()),
+                          child: Row(
+                            children: [
+                              Text(index.toString()),
+                              SizedBox(width: 4),
+                              Text('min'),
+
+                            ],
+                          ),
                         );
                       },
                     ),
                     style: TextStyle(
-                      fontSize: 18.0, // Adjust font size
-                      color: Colors.black, // Adjust text color
+                      fontSize: 18.0,
+                      color: Colors.black,
                     ),
                     dropdownColor: Colors.white,
-                    // Adjust dropdown background color
                     elevation: 4,
-                    // Adjust elevation
                     icon: Icon(Icons.arrow_drop_down),
-                    // Customize dropdown icon
                     iconSize: 24.0,
-                    // Adjust icon size
                     isDense: true,
-                    // Reduce vertical padding
-                    underline: Container( // Customize underline
+                    underline: Container(
                       height: 2,
                       color: Colors.black,
                     ),
-
                   ),
                 ),
               ),
+
+
               SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
                   _saveTimeSettings();
+                  setState(() {
+                    _progress = _calculateProgress();
+                  });
                   var start = widget._startTime ?? TimeOfDay.now();
                   var end = widget._endTime ?? TimeOfDay.now();
                   var data =

@@ -23,13 +23,13 @@ Color wakeColor=Colors.blue;
 bool wakeSaved=false;
 bool wakeApplied=false;
 
-void _saveStartColor(Color color) async {
+void _saveWakeColor(Color color) async {
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setInt('wakeColor', color.value);
 }
 
-void ApplyStartColor(bool save,BuildContext context, String c_uid) {
+void ApplyWakeColor(bool save,BuildContext context, String c_uid) {
 
   HSVColor hsvDecode = HSVColor.fromColor(wakeColor);
   var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
@@ -43,14 +43,14 @@ class WakeColorPageState extends State<WakeColorPage> {
   @override
   void initState() {
     super.initState();
-    _loadColor(); // Load the saved color when the page is initialized.
+    _loadWakeColor(); // Load the saved color when the page is initialized.
   }
 
   void _onColorChanged(HSVColor color) {
     setState(() => wakeColor = color.toColor());
   }
 
-  void _loadColor() async {
+  void _loadWakeColor() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int colorValue = prefs.getInt('wakeColor') ?? Colors.blue.value;
@@ -60,23 +60,6 @@ class WakeColorPageState extends State<WakeColorPage> {
       widget.isLoading = false; // Set loading to false after data is loaded
     });
   }
-/*
-  void _saveStartColor(Color color) async {
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setInt('startColor', color.value);
-
-
-  }
-
-  void ApplyStartColor(bool save,BuildContext context) {
-
-    HSVColor hsvDecode = HSVColor.fromColor(widget._wakeColor);
-    var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
-    writeDataWithCharacteristic(widget.c_uid, data, context);
-
-  }
-  */
 
   void _showInstructions() {
     showDialog(
@@ -167,7 +150,7 @@ class WakeColorPageState extends State<WakeColorPage> {
                 onPressed: () {
                   wakeApplied=true;
                   wakeSaved=false;
-                  ApplyStartColor(false,context,widget.c_uid);
+                  ApplyWakeColor(false,context,widget.c_uid);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal.shade800,
@@ -179,8 +162,8 @@ class WakeColorPageState extends State<WakeColorPage> {
                 onPressed: () {
                   wakeApplied=false;
                   wakeSaved=true;
-                  _saveStartColor(wakeColor); // Save the current color
-                  ApplyStartColor(true,context,widget.c_uid);
+                  _saveWakeColor(wakeColor); // Save the current color
+                  ApplyWakeColor(true,context,widget.c_uid);
                   Widget okButton = TextButton(
                   child: Text("OK"),
                   onPressed: (){

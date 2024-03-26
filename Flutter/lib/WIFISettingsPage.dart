@@ -188,7 +188,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                     context: context,
                     builder: (BuildContext context){
                       return AlertDialog(
-                        title: const Text("Connection Failed"),
+                        title: Row(
+                            children: [
+                              Icon(Icons.cancel,color: Colors.red,), // Add an icon if you want
+                              SizedBox(width: 8), // Add some space between the icon and text
+                              Text("Connection Failed",),
+                            ]
+                        ),
                         content: const Text("Do you Want to configure time with phone clock instead?"),
                         actions: <Widget> [
                           TextButton(onPressed: (){
@@ -202,7 +208,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text("Time Configured"),
+                                  title: Row(
+                                      children: [
+                                        Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
+                                        SizedBox(width: 8), // Add some space between the icon and text
+                                        Text("Time Configured",),
+                                      ]
+                                  ),
                                   content: Text(
                                     "",
                                   ),
@@ -236,7 +248,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
                   // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
-                    title: Text("Connection Failed"),
+                    title:  Row(
+                        children: [
+                          Icon(Icons.warning,color: Colors.yellow,), // Add an icon if you want
+                          SizedBox(width: 8), // Add some space between the icon and text
+                          Text("Connection Failed",),
+                        ]
+                    ),
                     content: Text("Time is already configured"),
                     actions: [
                       okButton,
@@ -260,7 +278,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                     context: context,
                     builder: (BuildContext context){
                       return AlertDialog(
-                        title: const Text("Connection Succeeded but failed to configure time"),
+                        title:  Row(
+                            children: [
+                              Icon(Icons.warning,color: Colors.yellow), // Add an icon if you want
+                              SizedBox(width: 8), // Add some space between the icon and text
+                              Text("Connection Succeeded but failed to configure time"),
+                            ]
+                        ),
                         content: const Text("Do you Want to configure time with phone clock instead?"),
                         actions: <Widget> [
                           TextButton(onPressed: (){
@@ -274,7 +298,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text("Time Configured"),
+                                    title: Row(
+                                        children: [
+                                          Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
+                                          SizedBox(width: 8), // Add some space between the icon and text
+                                          Text("Time Configured",),
+                                        ]
+                                    ),
                                     content: Text(
                                       "",
                                     ),
@@ -312,7 +342,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
                 // set up the AlertDialog
                 AlertDialog alert = AlertDialog(
-                  title: Text("Connection Succeeded"),
+                  title:  Row(
+                      children: [
+                        Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
+                        SizedBox(width: 8), // Add some space between the icon and text
+                        Text("Connection Succeeded",),
+                      ]
+                  ),
                   content: Text("Time Configured"),
                   actions: [
                     okButton,
@@ -340,7 +376,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
                 // set up the AlertDialog
                 AlertDialog alert = AlertDialog(
-                  title: Text("Connection Failed"),
+                  title: Row(
+                      children: [
+                        Icon(Icons.warning,color: Colors.yellow), // Add an icon if you want
+                        SizedBox(width: 8), // Add some space between the icon and text
+                        Text("Connection Failed"),
+                      ]
+                  ),
                   content: Text("Time is already configured"),
                   actions: [
                     okButton,
@@ -370,7 +412,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
                   // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
-                    title: Text("Bluetooth Disconnected"),
+                    title: Row(
+                        children: [
+                          Icon(Icons.cancel,color: Colors.red), // Add an icon if you want
+                          SizedBox(width: 8), // Add some space between the icon and text
+                          Text("Bluetooth Disconnected"),
+                        ]
+                    ),
                     content: Text("Connect to Bluetooth again"),
                     actions: [
                       okButton,
@@ -400,7 +448,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
                   // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
-                    title: Text("Unexpected Error"),
+                    title: Row(
+                        children: [
+                          Icon(Icons.cancel,color: Colors.red,), // Add an icon if you want
+                          SizedBox(width: 8), // Add some space between the icon and text
+                          Text("Unexpected Error",),
+                        ]
+                    ),
                     content: Text("Try Connecting again"),
                     actions: [
                       okButton,
