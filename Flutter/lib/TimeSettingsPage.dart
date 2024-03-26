@@ -55,15 +55,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   void initState() {
     super.initState();
     _loadTimeSettings();
-    //_updateProgressAutomatically();
     _startTimer();
-  }
-
-  void _updateProgressAutomatically() {
-    Future.delayed(Duration(seconds: 1), () {
-      _progress = _calculateProgress();
-      _updateProgressAutomatically();
-    });
   }
 
   bool get _isFadingIn {
@@ -84,13 +76,17 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     DateTime startTime = DateTime(
         now.year, now.month, now.day, widget._startTime!.hour,
         widget._startTime!.minute);
-    DateTime tranistion = DateTime(
+    DateTime endTime = DateTime(
         now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute).subtract(Duration(minutes: widget.transitionTime));
-    if(!tranistion.isAfter(startTime))
+        widget._endTime!.minute);
+    DateTime tranistion = endTime.subtract(Duration(minutes: widget.transitionTime));
+
+    if(!tranistion.isAfter(startTime) && !tranistion.isAtSameMomentAs(startTime)) {
       tranistion = tranistion.add(Duration(days: 1));
-    if(!now.isAfter(startTime))
+    }
+    if(!now.isAfter(startTime) ) {
       now = now.add(Duration(days: 1));
+    }
     return now.isBefore(tranistion);
   }
 
@@ -164,6 +160,16 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     }
   }
 
+  void updateVals(){
+    setState(() {
+      widget.fadeOut= min(
+          widget.fadeOut, max((limitFade() - widget.fadeIn), 0));
+      widget.fadeIn=min(
+          widget.fadeIn, max((limitFade() - widget.fadeOut), 0));
+      widget.transitionTime=min(widget.transitionTime, limitTrans());
+    });
+  }
+
 
   double _calculateProgress() {
     if (widget._startTime == null || widget._endTime == null) {
@@ -171,29 +177,46 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     }
 
     DateTime now = DateTime.now();
-    DateTime temp = DateTime(
+    DateTime startTime = DateTime(
         now.year, now.month, now.day, widget._startTime!.hour,
         widget._startTime!.minute);
-    DateTime startTime = DateTime(
+    DateTime startTimeWithFadeIn = DateTime(
         now.year, now.month, now.day, widget._startTime!.hour,
         widget._startTime!.minute)
         .subtract(Duration(minutes: widget.fadeIn));
-    if(!startTime.isAfter(temp))
-      startTime = startTime.add(Duration(days: 1));
+    if(!startTimeWithFadeIn.isAfter(startTime))
+      startTimeWithFadeIn = startTimeWithFadeIn.add(Duration(days: 1));
+
     DateTime endTimeWithFadeOut = DateTime(
         now.year, now.month, now.day, widget._endTime!.hour,
         widget._endTime!.minute)
         .add(Duration(minutes: widget.fadeOut));
-    if(!now.isAfter(startTime))
+
+    if(!now.isAfter(startTimeWithFadeIn))
       now = now.add(Duration(days: 1));
-    if(!endTimeWithFadeOut.isAfter(startTime))
+    while(!endTimeWithFadeOut.isAfter(startTimeWithFadeIn)) {
       endTimeWithFadeOut = endTimeWithFadeOut.add(Duration(days: 1));
-    Duration totalDuration = endTimeWithFadeOut.difference(startTime);
-    Duration elapsedTime = now.difference(startTime);
+    }
+
+    print(startTimeWithFadeIn);
+    print(endTimeWithFadeOut);
+
+    Duration totalDuration;
+   if(endTimeWithFadeOut.isAfter(startTimeWithFadeIn)){
+     totalDuration = endTimeWithFadeOut.difference(startTimeWithFadeIn);
+   }else{
+     totalDuration = startTimeWithFadeIn.difference(endTimeWithFadeOut);
+   }
+   print(totalDuration);
+    Duration elapsedTime = now.difference(startTimeWithFadeIn);
     double progress = elapsedTime.inMilliseconds / totalDuration.inMilliseconds;
+    print(elapsedTime);
 
     // Ensure progress is between 0 and 1
     progress = progress.clamp(0.0, 1.0);
+
+    print(progress);
+
     return progress;
   }
 
@@ -211,6 +234,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
             widget._startTime = value!;
           else
             widget._endTime = value!;
+          updateVals();
         }
       });
     });
@@ -233,7 +257,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   }
 
   int limitDelay(){
-  return 10;
+  return 120;
   }
 
   int limitFade() {
@@ -273,8 +297,6 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       widget.delayTime = prefs.getInt('delayTime') ?? 0;
       widget.fadeOut = prefs.getInt('fadeOut') ?? 0;
       widget.fadeIn = prefs.getInt('fadeIn') ?? 0;
-      //sleepColor = Color(prefs.getInt('sleepColor') ?? Colors.blue.value);
-      //wakeColor = Color(prefs.getInt('wakeColor') ?? Colors.blue.value);
       widget.transitionTime = prefs.getInt('transitionTime') ?? 0;
       widget.isLoading = false;
     });
@@ -486,75 +508,6 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                   ),
                 ),
               ),
-
-              /*
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  OutlinedButton(
-                    onPressed: () => _showTimePicker(true),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 5.0, vertical: 25.0),
-                      child: Text.rich(
-                        TextSpan(
-                          text: 'Sleep Time',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                          children: [
-                            TextSpan(
-                              text: "\n" +
-                                  (widget._startTime != null
-                                      ? widget._startTime!
-                                      .format(context)
-                                      : TimeOfDay.now().format(context)),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  OutlinedButton(
-                    onPressed: () => _showTimePicker(false),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 5.0, vertical: 25.0),
-                      child: Text.rich(
-                        TextSpan(
-                          text: 'Wake Up Time',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                          children: [
-                            TextSpan(
-                              text: "\n" +
-                                  (widget._endTime != null
-                                      ? widget._endTime!
-                                      .format(context)
-                                      : TimeOfDay.now().format(context)),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-               */
               SizedBox(
                 height: 25,
               ),
@@ -583,6 +536,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       setState(() {
                         widget.fadeIn = newValue!;
                       });
+                      updateVals();
                     },
                     items: List.generate(
                       max((limitFade() - widget.fadeOut) + 1, 1),
@@ -648,6 +602,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       setState(() {
                         widget.fadeOut = newValue!;
                       });
+                      updateVals();
                     },
                     items: List.generate(
                       max((limitFade() - widget.fadeIn) + 1, 1),
@@ -788,7 +743,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                             children: [
                               Text(index.toString()),
                               SizedBox(width: 4),
-                              Text('min'),
+                              Text('sec'),
 
                             ],
                           ),

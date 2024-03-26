@@ -259,8 +259,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         : Icons.timer_off_outlined,
                     title: 'Time',
                   ),
-                  TabItem(icon: Icons.sunny, title: 'Day Mode'),
-                  TabItem(icon: Icons.nightlight_outlined, title: 'Night Mode'),
+                  TabItem(icon: Icons.sunny, title: 'Wake Color'),
+                  TabItem(icon: Icons.nightlight_outlined, title: 'Sleep Color'),
                   TabItem(
                     icon: context.watch<myProvider>().wifiConnected
                         ? Icons.wifi

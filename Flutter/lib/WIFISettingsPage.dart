@@ -192,7 +192,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                             children: [
                               Icon(Icons.cancel,color: Colors.red,), // Add an icon if you want
                               SizedBox(width: 8), // Add some space between the icon and text
-                              Text("Connection Failed",),
+                              Text("Connection Failed",style: TextStyle(fontSize: 20,)),
                             ]
                         ),
                         content: const Text("Do you Want to configure time with phone clock instead?"),
@@ -212,7 +212,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                                       children: [
                                         Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
                                         SizedBox(width: 8), // Add some space between the icon and text
-                                        Text("Time Configured",),
+                                        Text("Time Configured",style: TextStyle(fontSize: 20,)),
                                       ]
                                   ),
                                   content: Text(
@@ -245,14 +245,13 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                       Navigator.of(context).pop();
                     },
                   );
-
                   // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
                     title:  Row(
                         children: [
                           Icon(Icons.warning,color: Colors.yellow,), // Add an icon if you want
                           SizedBox(width: 8), // Add some space between the icon and text
-                          Text("Connection Failed",),
+                          Text("Connection Failed",style: TextStyle(fontSize: 20,)),
                         ]
                     ),
                     content: Text("Time is already configured"),
@@ -280,9 +279,9 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                       return AlertDialog(
                         title:  Row(
                             children: [
-                              Icon(Icons.warning,color: Colors.yellow), // Add an icon if you want
-                              SizedBox(width: 8), // Add some space between the icon and text
-                              Text("Connection Succeeded but failed to configure time"),
+                              Icon(Icons.warning,color: Colors.yellow.shade200), // Add an icon if you want
+                              SizedBox(width: 5), // Add some space between the icon and text
+                              Text("Connection Succeeded \nbut failed to configure\ntime",style: TextStyle(fontSize: 20,),),
                             ]
                         ),
                         content: const Text("Do you Want to configure time with phone clock instead?"),
@@ -298,11 +297,11 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Row(
+                                    title:  Row(
                                         children: [
                                           Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
                                           SizedBox(width: 8), // Add some space between the icon and text
-                                          Text("Time Configured",),
+                                          Text("Time Configured",style: TextStyle(fontSize: 20,)),
                                         ]
                                     ),
                                     content: Text(
@@ -346,7 +345,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                       children: [
                         Icon(Icons.check_circle,color: Colors.green,), // Add an icon if you want
                         SizedBox(width: 8), // Add some space between the icon and text
-                        Text("Connection Succeeded",),
+                        Text("Connection Succeeded",style: TextStyle(fontSize: 20,)),
                       ]
                   ),
                   content: Text("Time Configured"),
@@ -378,9 +377,9 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                 AlertDialog alert = AlertDialog(
                   title: Row(
                       children: [
-                        Icon(Icons.warning,color: Colors.yellow), // Add an icon if you want
+                        Icon(Icons.warning,color: Colors.yellow.shade200), // Add an icon if you want
                         SizedBox(width: 8), // Add some space between the icon and text
-                        Text("Connection Failed"),
+                        Text("Connection Failed",style: TextStyle(fontSize: 20,)),
                       ]
                   ),
                   content: Text("Time is already configured"),
@@ -416,7 +415,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                         children: [
                           Icon(Icons.cancel,color: Colors.red), // Add an icon if you want
                           SizedBox(width: 8), // Add some space between the icon and text
-                          Text("Bluetooth Disconnected"),
+                          Text("Bluetooth Disconnected",style: TextStyle(fontSize: 20,)),
                         ]
                     ),
                     content: Text("Connect to Bluetooth again"),
@@ -448,11 +447,12 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
 
                   // set up the AlertDialog
                   AlertDialog alert = AlertDialog(
-                    title: Row(
+                    title:
+                    Row(
                         children: [
                           Icon(Icons.cancel,color: Colors.red,), // Add an icon if you want
                           SizedBox(width: 8), // Add some space between the icon and text
-                          Text("Unexpected Error",),
+                          Text("Unexpected Error",style: TextStyle(fontSize: 20,)),
                         ]
                     ),
                     content: Text("Try Connecting again"),
