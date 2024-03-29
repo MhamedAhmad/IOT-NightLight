@@ -23,13 +23,24 @@ class TimeSettingsPage extends StatefulWidget {
   int fadeOut = 0;
   int fadeIn = 0;
   bool isLoading = true;
-  String loadingMessage = 'Loading Time Settings...';
+  String loadingMessage = 'Loading Data...';
+
+  TimeOfDay? _startTimeSaved = TimeOfDay.now();
+  TimeOfDay? _endTimeSaved  = TimeOfDay.now();
+  int delayTimeSaved  = 0;
+  int transitionTimeSaved  = 0;
+  int fadeOutSaved  = 0;
+  int fadeInSaved  = 0;
+
+
+
 
   @override
   State<TimeSettingsPage> createState() => _TimeSettingsPageState();
 }
 
-
+Color sleepColorSaved=Colors.blue;
+Color wakeColorSaved=Colors.blue;
 
 class _TimeSettingsPageState extends State<TimeSettingsPage> {
   double _progress = 0.0;
@@ -55,17 +66,18 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   void initState() {
     super.initState();
     _loadTimeSettings();
+    _loadSavedTimeSettings();
     _startTimer();
   }
 
   bool get _isFadingIn {
     DateTime now = DateTime.now();
     DateTime startTime = DateTime(
-        now.year, now.month, now.day, widget._startTime!.hour,
-        widget._startTime!.minute).subtract(Duration(minutes: widget.fadeIn));
+        now.year, now.month, now.day, widget._startTimeSaved!.hour,
+        widget._startTimeSaved!.minute).subtract(Duration(minutes: widget.fadeInSaved));
     DateTime fadeInEndTime = DateTime(
-        now.year, now.month, now.day, widget._startTime!.hour,
-        widget._startTime!.minute);
+        now.year, now.month, now.day, widget._startTimeSaved!.hour,
+        widget._startTimeSaved!.minute);
     if(!now.isBefore(fadeInEndTime))
       now = now.subtract(Duration(days: 1));
     return now.isAfter(startTime);
@@ -74,12 +86,12 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   bool get _isNightMode {
     DateTime now = DateTime.now();
     DateTime startTime = DateTime(
-        now.year, now.month, now.day, widget._startTime!.hour,
-        widget._startTime!.minute);
+        now.year, now.month, now.day, widget._startTimeSaved!.hour,
+        widget._startTimeSaved!.minute);
     DateTime endTime = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute);
-    DateTime tranistion = endTime.subtract(Duration(minutes: widget.transitionTime));
+        now.year, now.month, now.day, widget._endTimeSaved!.hour,
+        widget._endTimeSaved!.minute);
+    DateTime tranistion = endTime.subtract(Duration(minutes: widget.transitionTimeSaved));
 
     if(!tranistion.isAfter(startTime) && !tranistion.isAtSameMomentAs(startTime)) {
       tranistion = tranistion.add(Duration(days: 1));
@@ -93,11 +105,11 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   bool get _isTransitioning {
     DateTime now = DateTime.now();
     DateTime endTime = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute);
+        now.year, now.month, now.day, widget._endTimeSaved!.hour,
+        widget._endTimeSaved!.minute);
     DateTime tranistion = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute).subtract(Duration(minutes: widget.transitionTime));
+        now.year, now.month, now.day, widget._endTimeSaved!.hour,
+        widget._endTimeSaved!.minute).subtract(Duration(minutes: widget.transitionTimeSaved));
     if(!now.isBefore(endTime))
       now = now.subtract(Duration(days: 1));
     return now.isAfter(tranistion);
@@ -106,11 +118,11 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   bool get _isFadingOut {
     DateTime now = DateTime.now();
     DateTime endTime = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute);
+        now.year, now.month, now.day, widget._endTimeSaved!.hour,
+        widget._endTimeSaved!.minute);
     DateTime fadeOutEndTime = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute).add(Duration(minutes: widget.fadeOut));
+        now.year, now.month, now.day, widget._endTimeSaved!.hour,
+        widget._endTimeSaved!.minute).add(Duration(minutes: widget.fadeOutSaved));
     if(!now.isAfter(endTime))
       now = now.add(Duration(days: 1));
     return now.isBefore(fadeOutEndTime);
@@ -148,13 +160,14 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
 
   Color _buildColor() {
     if (_isFadingIn) {
-      return sleepColor.withAlpha(128);
+      return sleepColorSaved.withAlpha(128);
     } else if (_isNightMode) {
-      return sleepColor;
+      print(sleepColorSaved);
+      return sleepColorSaved;
     } else if (_isTransitioning) {
-      return sleepColor.withAlpha(128);
+      return sleepColorSaved.withAlpha(128);
     } else if (_isFadingOut) {
-      return wakeColor;
+      return wakeColorSaved;
     } else {
       return Colors.grey.shade300;
     }
@@ -170,27 +183,26 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     });
   }
 
-
   double _calculateProgress() {
-    if (widget._startTime == null || widget._endTime == null) {
+    if (widget._startTimeSaved == null || widget._endTimeSaved == null) {
       return 0.0;
     }
 
     DateTime now = DateTime.now();
     DateTime startTime = DateTime(
-        now.year, now.month, now.day, widget._startTime!.hour,
-        widget._startTime!.minute);
+        now.year, now.month, now.day, widget._startTimeSaved!.hour,
+        widget._startTimeSaved!.minute);
     DateTime startTimeWithFadeIn = DateTime(
-        now.year, now.month, now.day, widget._startTime!.hour,
-        widget._startTime!.minute)
-        .subtract(Duration(minutes: widget.fadeIn));
+        now.year, now.month, now.day, widget._startTimeSaved!.hour,
+        widget._startTimeSaved!.minute)
+        .subtract(Duration(minutes: widget.fadeInSaved));
     if(!startTimeWithFadeIn.isAfter(startTime))
       startTimeWithFadeIn = startTimeWithFadeIn.add(Duration(days: 1));
 
     DateTime endTimeWithFadeOut = DateTime(
-        now.year, now.month, now.day, widget._endTime!.hour,
-        widget._endTime!.minute)
-        .add(Duration(minutes: widget.fadeOut));
+        now.year, now.month, now.day, widget._endTimeSaved!.hour,
+        widget._endTimeSaved!.minute)
+        .add(Duration(minutes: widget.fadeOutSaved));
 
     if(!now.isAfter(startTimeWithFadeIn))
       now = now.add(Duration(days: 1));
@@ -198,8 +210,8 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       endTimeWithFadeOut = endTimeWithFadeOut.add(Duration(days: 1));
     }
 
-    print(startTimeWithFadeIn);
-    print(endTimeWithFadeOut);
+    //print(startTimeWithFadeIn);
+    //print(endTimeWithFadeOut);
 
     Duration totalDuration;
    if(endTimeWithFadeOut.isAfter(startTimeWithFadeIn)){
@@ -207,19 +219,18 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
    }else{
      totalDuration = startTimeWithFadeIn.difference(endTimeWithFadeOut);
    }
-   print(totalDuration);
+   //print(totalDuration);
     Duration elapsedTime = now.difference(startTimeWithFadeIn);
     double progress = elapsedTime.inMilliseconds / totalDuration.inMilliseconds;
-    print(elapsedTime);
+    //print(elapsedTime);
 
     // Ensure progress is between 0 and 1
     progress = progress.clamp(0.0, 1.0);
 
-    print(progress);
+    //print(progress);
 
     return progress;
   }
-
 
   void _showTimePicker(bool setStart) {
     showTimePicker(
@@ -277,6 +288,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   }
 
   void _loadTimeSettings() async {
+    widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int startHour = prefs.getInt('startHour') ?? TimeOfDay
         .now()
@@ -301,6 +313,37 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       widget.isLoading = false;
     });
   }
+
+  void _loadSavedTimeSettings() async {
+    widget.isLoading = true;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int startHour = prefs.getInt('startHour') ?? TimeOfDay
+        .now()
+        .hour;
+    int startMinute = prefs.getInt('startMinute') ?? TimeOfDay
+        .now()
+        .minute;
+    int endHour = prefs.getInt('endHour') ?? TimeOfDay
+        .now()
+        .hour;
+    int endMinute = prefs.getInt('endMinute') ?? TimeOfDay
+        .now()
+        .minute;
+
+    setState(() {
+      widget._startTimeSaved = TimeOfDay(hour: startHour, minute: startMinute);
+      widget._endTimeSaved = TimeOfDay(hour: endHour, minute: endMinute);
+      widget.delayTimeSaved = prefs.getInt('delayTime') ?? 0;
+      widget.fadeOutSaved = prefs.getInt('fadeOut') ?? 0;
+      widget.fadeInSaved = prefs.getInt('fadeIn') ?? 0;
+      widget.transitionTimeSaved = prefs.getInt('transitionTime') ?? 0;
+      sleepColorSaved=Color(prefs.getInt('sleepColor') ?? Colors.blue.value);
+      wakeColorSaved=Color(prefs.getInt('wakeColor') ?? Colors.blue.value);
+
+       widget.isLoading = false;
+    });
+  }
+
 
   void _saveTimeSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -772,6 +815,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
               ElevatedButton(
                 onPressed: () {
                   _saveTimeSettings();
+                  _loadSavedTimeSettings();
                   setState(() {
                     _progress = _calculateProgress();
                   });

@@ -211,6 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setInt('wakeColor', color.value);
+      wakeColorSaved=color;
 
       HSVColor hsvDecode = HSVColor.fromColor(wakeColor);
       var data = '${hsvDecode.hue}+${hsvDecode.saturation}+${hsvDecode.value}+${save ? '1' : '0'}';
@@ -223,6 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('sleepColor', color.value);
     prefs.setDouble('motionDetectionValue', motionDetectionValue);
+    sleepColorSaved=color;
 
     HSVColor hsvDecode = HSVColor.fromColor(sleepColor);
     var data =
