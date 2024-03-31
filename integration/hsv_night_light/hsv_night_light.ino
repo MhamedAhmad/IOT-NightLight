@@ -50,7 +50,7 @@ Preferences prefs;
 //------------------------------------------------------------------------------------------------------
 //initializations
 #define PIN        26
-#define NUMPIXELS 3
+#define NUMPIXELS 56
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 int low_hue = 0;
 int low_saturation = 0;
@@ -67,10 +67,10 @@ void light(float fraction, byte mode, bool motion=false)
   int val = 0;
   int top_hue = 0;
   int top_sat = 0;
-  int top_val = 0;
+  int top_val = 23;
   int bot_hue = 0;
   int bot_sat = 0;
-  int bot_val = 0;
+  int bot_val = 23;
   if(mode == 0)
   {
     bot_hue = low_hue;
@@ -101,12 +101,12 @@ void light(float fraction, byte mode, bool motion=false)
     hue = low_hue;
     sat = low_saturation;
     val = motion_value;
-    if(my_now < first_motion + 10){
-      val = ((my_now -first_motion)/(float)10) * motion_value + (1-((my_now -first_motion)/(float)10)) * low_value;
+    if(my_now < first_motion + 5){
+      val = ((my_now -first_motion)/(float)5) * motion_value + (1-((my_now -first_motion)/(float)5)) * low_value;
       last_motion = my_now;
     }
-    else if(my_now > last_motion + delay_time && my_now <= last_motion + delay_time + 10)
-      val = ((my_now -(last_motion + delay_time))/(float)10) * low_value + (1-((my_now -(last_motion + delay_time))/(float)10)) * motion_value;
+    else if(my_now > last_motion + delay_time && my_now <= last_motion + delay_time + 5)
+      val = ((my_now -(last_motion + delay_time))/(float)5) * low_value + (1-((my_now -(last_motion + delay_time))/(float)5)) * motion_value;
   }
   else
   {
@@ -391,9 +391,9 @@ void detectMotion()
         my_now = my_now + 4294967;
       if(my_now - last_motion >= delay_time){
         motion_detected = false;
-        offset = 10 - (my_now - last_motion - delay_time);
+        offset = 5 - (my_now - last_motion - delay_time);
       }
-      if((my_now - last_motion >= delay_time + 10 && my_now - first_motion >= delay_time + 20) || last_motion == 4294967){
+      if((my_now - last_motion >= delay_time + 5 && my_now - first_motion >= delay_time + 10) || last_motion == 4294967){
         actAccordingTime();
         offset = 0;
       }
