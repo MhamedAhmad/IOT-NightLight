@@ -277,5 +277,5 @@ showDialog(context: context, builder: (context) {
 Future<void> checkPermission(Permission permission, BuildContext context) async{
   final status = await permission.request();
   if(!status.isGranted)
-    openAppSettings();
+    await openAppSettings();
 }

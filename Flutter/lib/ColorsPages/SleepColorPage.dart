@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../HomePage.dart';
 
-Color sleepColor = Colors.red;
+Color sleepColor = Color(0xFF320000);
 double motionDetectionValue = 0;
 bool sleepSaved=false;
 bool sleepApplied=false;
@@ -54,8 +54,8 @@ class SleepColorPageState extends State<SleepColorPage> {
   void _loadColorAndMotionDetection() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int colorValue = prefs.getInt('sleepColor') ?? Colors.blue.value;
-    double motionDetectionVal = prefs.getDouble('motionDetectionValue') ?? 0;
+    int colorValue = prefs.getInt('sleepColor') ?? 0xFF320000;
+    double motionDetectionVal = prefs.getDouble('motionDetectionValue') ?? 0.6;
 
     setState(() {
       sleepColor = Color(colorValue);

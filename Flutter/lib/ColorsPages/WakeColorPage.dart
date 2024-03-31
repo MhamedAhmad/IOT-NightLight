@@ -19,7 +19,7 @@ class WakeColorPage extends StatefulWidget {
   State<WakeColorPage> createState() => WakeColorPageState();
 }
 
-Color wakeColor=Colors.blue;
+Color wakeColor=Color(0xFF000032);
 bool wakeSaved=false;
 bool wakeApplied=false;
 
@@ -53,7 +53,7 @@ class WakeColorPageState extends State<WakeColorPage> {
   void _loadWakeColor() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int colorValue = prefs.getInt('wakeColor') ?? Colors.blue.value;
+    int colorValue = prefs.getInt('wakeColor') ?? 0xFF000032;
 
     setState(() {
       wakeColor = Color(colorValue);

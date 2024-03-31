@@ -16,21 +16,21 @@ class TimeSettingsPage extends StatefulWidget {
   TimeSettingsPage(this.c_uid, {Key? key});
 
   late String c_uid;
-  TimeOfDay? _startTime = TimeOfDay.now();
-  TimeOfDay? _endTime = TimeOfDay.now();
-  int delayTime = 0;
-  int transitionTime = 0;
-  int fadeOut = 0;
-  int fadeIn = 0;
+  TimeOfDay? _startTime = TimeOfDay(hour: 21, minute: 0);
+  TimeOfDay? _endTime = TimeOfDay(hour: 7, minute: 0);
+  int delayTime = 115;
+  int transitionTime = 30;
+  int fadeOut = 60;
+  int fadeIn = 10;
   bool isLoading = true;
   String loadingMessage = 'Loading Data...';
 
-  TimeOfDay? _startTimeSaved = TimeOfDay.now();
-  TimeOfDay? _endTimeSaved  = TimeOfDay.now();
-  int delayTimeSaved  = 0;
-  int transitionTimeSaved  = 0;
-  int fadeOutSaved  = 0;
-  int fadeInSaved  = 0;
+  TimeOfDay? _startTimeSaved = TimeOfDay(hour: 21, minute: 0);
+  TimeOfDay? _endTimeSaved  = TimeOfDay(hour: 7, minute: 0);
+  int delayTimeSaved  = 115;
+  int transitionTimeSaved  = 30;
+  int fadeOutSaved  = 60;
+  int fadeInSaved  = 10;
 
 
 
@@ -176,9 +176,9 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
   void updateVals(){
     setState(() {
       widget.fadeOut= min(
-          widget.fadeOut, max((limitFade() - widget.fadeIn), 0));
+          widget.fadeOut, min(120, max((limitFade() - widget.fadeIn), 0)));
       widget.fadeIn=min(
-          widget.fadeIn, max((limitFade() - widget.fadeOut), 0));
+          widget.fadeIn, min(120, max((limitFade() - widget.fadeOut), 0)));
       widget.transitionTime=min(widget.transitionTime, limitTrans());
     });
   }
@@ -204,7 +204,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         widget._endTimeSaved!.minute)
         .add(Duration(minutes: widget.fadeOutSaved));
 
-    if(!now.isAfter(startTimeWithFadeIn))
+    while(!now.isAfter(startTimeWithFadeIn))
       now = now.add(Duration(days: 1));
     while(!endTimeWithFadeOut.isAfter(startTimeWithFadeIn)) {
       endTimeWithFadeOut = endTimeWithFadeOut.add(Duration(days: 1));
@@ -279,32 +279,24 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         : 24 * 60 - (startTimeInMinutes - endTimeInMinutes);
 
     // Calculate maximum allowed rise time and fade time (capped at 10 minutes)
-    return availableTime.clamp(0, 120);
+    return availableTime.clamp(0, 240);
   }
 
   void _loadTimeSettings() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int startHour = prefs.getInt('startHour') ?? TimeOfDay
-        .now()
-        .hour;
-    int startMinute = prefs.getInt('startMinute') ?? TimeOfDay
-        .now()
-        .minute;
-    int endHour = prefs.getInt('endHour') ?? TimeOfDay
-        .now()
-        .hour;
-    int endMinute = prefs.getInt('endMinute') ?? TimeOfDay
-        .now()
-        .minute;
+    int startHour = prefs.getInt('startHour') ?? 21;
+    int startMinute = prefs.getInt('startMinute') ?? 0;
+    int endHour = prefs.getInt('endHour') ?? 7;
+    int endMinute = prefs.getInt('endMinute') ?? 0;
 
     setState(() {
       widget._startTime = TimeOfDay(hour: startHour, minute: startMinute);
       widget._endTime = TimeOfDay(hour: endHour, minute: endMinute);
-      widget.delayTime = prefs.getInt('delayTime') ?? 0;
-      widget.fadeOut = prefs.getInt('fadeOut') ?? 0;
-      widget.fadeIn = prefs.getInt('fadeIn') ?? 0;
-      widget.transitionTime = prefs.getInt('transitionTime') ?? 0;
+      widget.delayTime = prefs.getInt('delayTime') ?? 110;
+      widget.fadeOut = prefs.getInt('fadeOut') ?? 60;
+      widget.fadeIn = prefs.getInt('fadeIn') ?? 10;
+      widget.transitionTime = prefs.getInt('transitionTime') ?? 30;
       widget.isLoading = false;
     });
   }
@@ -568,7 +560,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
 
                   child: DropdownButton<int>(
                     value: min(
-                        widget.fadeIn, max((limitFade() - widget.fadeOut), 0)),
+                        widget.fadeIn, min(120, max((limitFade() - widget.fadeOut), 0))),
                     onChanged: (int? newValue) {
                       setState(() {
                         widget.fadeIn = newValue!;
@@ -576,7 +568,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       updateVals();
                     },
                     items: List.generate(
-                      max((limitFade() - widget.fadeOut) + 1, 1),
+                      min(121, max((limitFade() - widget.fadeOut) + 1, 1)),
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,
@@ -634,7 +626,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                   child:
                   DropdownButton<int>(
                     value: min(
-                        widget.fadeOut, max((limitFade() - widget.fadeIn), 0)),
+                        widget.fadeOut, min(120, max((limitFade() - widget.fadeIn), 0))),
                     onChanged: (int? newValue) {
                       setState(() {
                         widget.fadeOut = newValue!;
@@ -642,7 +634,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       updateVals();
                     },
                     items: List.generate(
-                      max((limitFade() - widget.fadeIn) + 1, 1),
+                      min(121, max((limitFade() - widget.fadeIn) + 1, 1)),
                           (index) {
                         return DropdownMenuItem<int>(
                           value: index,

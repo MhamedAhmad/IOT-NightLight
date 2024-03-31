@@ -50,7 +50,13 @@ writeDataWithCharacteristic(String c, String data, BuildContext context) async {
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Bluetooth Disconnected"),
+      title: Row(
+          children: [
+            Icon(Icons.cancel,color: Colors.red), // Add an icon if you want
+            SizedBox(width: 8), // Add some space between the icon and text
+            Text("Bluetooth Disconnected",style: TextStyle(fontSize: 20,)),
+          ]
+      ),
       content: Text("Connect to Bluetooth again"),
       actions: [
         okButton,
