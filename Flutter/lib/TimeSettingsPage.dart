@@ -213,14 +213,9 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
     //print(startTimeWithFadeIn);
     //print(endTimeWithFadeOut);
 
-    Duration totalDuration;
-   if(endTimeWithFadeOut.isAfter(startTimeWithFadeIn)){
-     totalDuration = endTimeWithFadeOut.difference(startTimeWithFadeIn);
-   }else{
-     totalDuration = startTimeWithFadeIn.difference(endTimeWithFadeOut);
-   }
+    Duration totalDuration = startTimeWithFadeIn.difference(endTimeWithFadeOut).abs();
    //print(totalDuration);
-    Duration elapsedTime = now.difference(startTimeWithFadeIn);
+    Duration elapsedTime = now.difference(startTimeWithFadeIn).abs();
     double progress = elapsedTime.inMilliseconds / totalDuration.inMilliseconds;
     //print(elapsedTime);
 
@@ -339,8 +334,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       widget.transitionTimeSaved = prefs.getInt('transitionTime') ?? 0;
       sleepColorSaved=Color(prefs.getInt('sleepColor') ?? Colors.blue.value);
       wakeColorSaved=Color(prefs.getInt('wakeColor') ?? Colors.blue.value);
-
-       widget.isLoading = false;
+      widget.isLoading = false;
     });
   }
 
