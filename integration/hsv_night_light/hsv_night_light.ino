@@ -319,7 +319,7 @@ void handleCycleTimes(std::string times)
   sleep_time = sleep_hours * 3600 + sleep_minutes * 60;
   fade_in_time = 60 * (getValue(String(times.c_str()), '+', 5)).toInt();
   fade_out_time = 60 * (getValue(String(times.c_str()), '+', 4)).toInt();
-  delay_time = 60 * (getValue(String(times.c_str()), '+', 6)).toInt();
+  delay_time = (getValue(String(times.c_str()), '+', 6)).toInt();
   transition_time = 60 * (getValue(String(times.c_str()), '+', 7)).toInt();
   Serial.print("Start time: ");
   Serial.print(wake_hours);
