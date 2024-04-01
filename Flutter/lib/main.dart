@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:provider/provider.dart';
-import 'BTConnect.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';
 import 'WIFISettingsPage.dart';

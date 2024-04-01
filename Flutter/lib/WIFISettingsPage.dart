@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:nightlight/ColorPicker.dart';
-import 'package:nightlight/SeekWifiMessage.dart';
 import 'package:nightlight/main.dart';
 import 'HomePage.dart';
 import 'NavigateToBluetooth.dart';

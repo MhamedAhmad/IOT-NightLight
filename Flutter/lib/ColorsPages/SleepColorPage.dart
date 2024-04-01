@@ -2,14 +2,12 @@ import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nightlight/ColorPicker.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
-import 'package:nightlight/ColorsPages/WakeColorPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../HomePage.dart';
 
-Color sleepColor = Color(0xFF320000);
+Color sleepColor = Color(0xFF49120C);
 double motionDetectionValue = 0;
 bool sleepSaved=false;
 bool sleepApplied=false;
@@ -54,7 +52,7 @@ class SleepColorPageState extends State<SleepColorPage> {
   void _loadColorAndMotionDetection() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int colorValue = prefs.getInt('sleepColor') ?? 0xFF320000;
+    int colorValue = prefs.getInt('sleepColor') ?? 0xFF49120C;
     double motionDetectionVal = prefs.getDouble('motionDetectionValue') ?? 0.6;
 
     setState(() {

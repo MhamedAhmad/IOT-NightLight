@@ -1,7 +1,6 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:nightlight/ColorPicker.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,7 +18,7 @@ class WakeColorPage extends StatefulWidget {
   State<WakeColorPage> createState() => WakeColorPageState();
 }
 
-Color wakeColor=Color(0xFF000032);
+Color wakeColor=Color(0xFF979DF2);
 bool wakeSaved=false;
 bool wakeApplied=false;
 
@@ -53,7 +52,7 @@ class WakeColorPageState extends State<WakeColorPage> {
   void _loadWakeColor() async {
     widget.isLoading = true;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int colorValue = prefs.getInt('wakeColor') ?? 0xFF000032;
+    int colorValue = prefs.getInt('wakeColor') ?? 0xFF979DF2;
 
     setState(() {
       wakeColor = Color(colorValue);
