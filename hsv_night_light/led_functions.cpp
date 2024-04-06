@@ -81,6 +81,9 @@ void handleColors(std::string colors, bool high)
     high_hue = hue;
     high_saturation = sat;
     high_value = val;
+    prefs.putInt("high_hue", high_hue);
+    prefs.putInt("high_saturation", high_saturation);
+    prefs.putInt("high_value", high_value);
   }
   else
   {
@@ -88,6 +91,10 @@ void handleColors(std::string colors, bool high)
     low_saturation = sat;
     low_value = val;
     motion_value = 255*(getValue(String(colors.c_str()), '+', 4)).toFloat();
+    prefs.putInt("low_hue", low_hue);
+    prefs.putInt("low_saturation", low_saturation);
+    prefs.putInt("low_value", low_value);
+    prefs.putInt("motion_value", motion_value);
   }
 }
 
