@@ -164,8 +164,6 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
             ),
             ElevatedButton(onPressed: () async {
               var data = '${widget.ssid}+${widget.password}';
-              widget.ssid = '';
-              widget.password = '';
               writeDataWithCharacteristic(widget.c_uid,data,context);
               showDialog(context: context, builder: (context) {
                 Future.delayed(const Duration(seconds: 10), () async {
