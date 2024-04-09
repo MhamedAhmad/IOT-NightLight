@@ -1,5 +1,4 @@
-# NightLight 
-by Ahmad Mhamed,Noor Mahajna and Sham abu-Shtya.\
+# NightLight Project: by Ahmad Mhamed,Noor Mahajna and Sham abu-Shtya.
 The Night Light for Nursing Homes project aims to improve the sleep quality and nighttime mobility of residents in nursing homes by providing a specialized night light solution. This project addresses the unique needs of elderly individuals by offering a motion-sensing night light with customizable features such as adjustable sleep-friendly colors, intensity levels, and motion detection.
 ## About The Project in Details
 - **Adjustable Sleep-Friendly Lighting**: Users can customize the color temperature and intensity of the night light to create a comfortable sleep environment.
