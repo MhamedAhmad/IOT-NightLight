@@ -17,5 +17,5 @@ The Night Light for Nursing Homes project aims to improve the sleep quality and 
 - WifiManager - Version 2.0.17
 ## Project Diagram
 ![diagram](https://github.com/MhamedAhmad/IOT-NightLight/assets/158752975/be8331c8-610c-4ad4-be84-3aa3df369528)
-
+This project is part of ICST - The Interdisciplinary Center for Smart Technologies, Taub Faculty of Computer Science, Technion https://icst.cs.technion.ac.il/
 
