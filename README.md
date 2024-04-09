@@ -5,6 +5,7 @@ Main Features:
 - **Adjustable Sleep-Friendly Lighting**: Users can customize the color temperature and intensity of the night light to create a comfortable sleep environment.
 - **Motion Detection Capability**: The night light is equipped with motion sensors that adjust the light intensity when movement is detected, aiding in nighttime mobility.
 - **Mobile App Control**: The night light can be controlled via a mobile app, allowing users to set sleep/wake times, adjust lighting settings, and manage other features remotely.
+\
 How to use:
 1. Download 'nightlight' app.
 2. Turn on both bluetooth and location in your phone.
