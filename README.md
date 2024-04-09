@@ -6,7 +6,7 @@ Main Features:
 - **Motion Detection Capability**: The night light is equipped with motion sensors that adjust the light intensity when movement is detected, aiding in nighttime mobility.
 - **Mobile App Control**: The night light can be controlled via a mobile app, allowing users to set sleep/wake times, adjust lighting settings, and manage other features remotely.
 \
-How to use:
+# How to use:
 1. Download 'nightlight' app.
 2. Turn on both bluetooth and location in your phone.
 3. Press on connect to connect to the ESP via bluetooth and give permissions for location/bluetooth if asked.
