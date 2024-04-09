@@ -11,7 +11,7 @@ The Night Light for Nursing Homes project aims to improve the sleep quality and 
 - Flutter : dart code for our Flutter app.
 - UnitTests : tests for individual hardware components (input / output devices).
 - hsv_night_light : source code for the esp side (firmware).
-## Used Libraries
+## Arduino/ESP32 libraries used in this project
 - Adafruit_NeoPixel - Version 1.12.0
 - Time - Version 1.6.1
 - WifiManager - Version 2.0.17
