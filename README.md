@@ -16,6 +16,11 @@ Main Features:
 - Adafruit_NeoPixel - Version 1.12.0
 - Time - Version 1.6.1
 - WifiManager - Version 2.0.17
+## Hardware Used
+- 1 X ESP32 (30pins)
+- 1 X PIR
+- 1 X Neopixel (around 1 Meter)
+- 1 X External Power Bank
 ## Project Diagram
 ![diagram](https://github.com/MhamedAhmad/IOT-NightLight/assets/158752975/be8331c8-610c-4ad4-be84-3aa3df369528)\
 ## Project Poster
