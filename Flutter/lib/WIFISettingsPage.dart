@@ -15,12 +15,13 @@ class WIFISettingsPage extends StatefulWidget {
   State<WIFISettingsPage> createState() => _WIFISettingsPageState();
 }
 
-Future<int> receiveDataFromESP(String UUID) async {
+Future<int> receiveDataFromESP(String UUID, int count) async {
   BluetoothCharacteristic? ch = characteristicDictionary[UUID];
   if (ch == null) {
     return -1;
   }
-
+  if(count == 25)
+    return -1;
   int x = -1;
   try {
     await ch.setNotifyValue(true);
@@ -39,7 +40,7 @@ Future<int> receiveDataFromESP(String UUID) async {
   //print(x);
   await Future.delayed(const Duration(milliseconds: 500));
   if (x == -1) {
-    return await receiveDataFromESP(UUID);
+    return await receiveDataFromESP(UUID, count + 1);
   }
   return x;
 }
@@ -175,7 +176,7 @@ class _WIFISettingsPageState extends State<WIFISettingsPage> {
                     return;
                   },);
               },);
-              int x = await receiveDataFromESP("be31c4e4-c3f7-4b6f-83b3-d9421988d355");
+              int x = await receiveDataFromESP("be31c4e4-c3f7-4b6f-83b3-d9421988d355", 0);
               if(x == 0)
               {
                 Navigator.of(context).pop();
