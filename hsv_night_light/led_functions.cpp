@@ -18,6 +18,8 @@ void light(float fraction, byte mode, bool motion)
     bot_sat = low_saturation;
     top_sat = low_saturation;
     top_val = low_value;
+    if(fraction != 1)
+      first_motion = my_now;
   }
   else if(mode == 1)
   {

@@ -33,8 +33,21 @@ void actAccordingTime(bool motion)
     time = hour()*3600 + minute()*60 + second();
   else
   {
+    if(phase == -1){
+      pixels.fill(3350784);
+      pixels.show();
+      phase = 1;
+    }
+    else
+    {
+      pixels.clear();
+      pixels.show();
+      phase = -1;
+    }
     return;
   }
+  if(!motion)
+    last_motion = 4294967;
   if(wake_time <= sleep_time)
   {
     if(time == wake_time)

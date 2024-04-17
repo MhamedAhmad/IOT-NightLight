@@ -15,7 +15,13 @@ void detectMotion()
     if(my_now < first_motion)
       my_now = my_now + 4294967;
     last_motion = millis()/1000;
-    actAccordingTime(true);
+    if(configured || manually_configured)
+      actAccordingTime(true);
+    else if(!connecting)
+    {
+      actAccordingTime();
+      connectWithPref();
+    }
   }
   else 
   {
@@ -39,6 +45,9 @@ void detectMotion()
         actAccordingTime(true);
     }
     else if(!connecting)
+    {
+      actAccordingTime();
       connectWithPref();
+    }
   }
 }

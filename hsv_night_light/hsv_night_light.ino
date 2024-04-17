@@ -24,6 +24,7 @@ int sleep_time = 0;
 int fade_in_time = 0;
 int fade_out_time = 0;
 int transition_time = 0;
+int phase = -1;
 //motion variables
 int pirState = LOW;
 int val = 0;

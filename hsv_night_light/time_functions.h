@@ -12,6 +12,7 @@ extern int sleep_time;
 extern int fade_in_time;
 extern int fade_out_time;
 extern int transition_time;
+extern int phase;
 extern bool connected;
 extern bool configured;
 extern bool manually_configured;
