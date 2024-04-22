@@ -259,7 +259,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         : endTimeInMinutes - startTimeInMinutes;
 
     // Calculate maximum allowed rise time and fade time (capped at 10 minutes)
-    return availableTime.clamp(0, 120);
+    return (availableTime.clamp(0, 120)~/10)*10;
   }
 
   int limitDelay(){
@@ -279,7 +279,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
         : 24 * 60 - (startTimeInMinutes - endTimeInMinutes);
 
     // Calculate maximum allowed rise time and fade time (capped at 10 minutes)
-    return availableTime.clamp(0, 240);
+    return (availableTime.clamp(0, 240)~/10)*10;
   }
 
   void _loadTimeSettings() async {
@@ -568,13 +568,13 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       updateVals();
                     },
                     items: List.generate(
-                      min(121, max((limitFade() - widget.fadeOut) + 1, 1)),
+                      min(13, max(((limitFade() - widget.fadeOut)~/10) + 1, 1)),
                           (index) {
                         return DropdownMenuItem<int>(
-                          value: index,
+                          value: index*10,
                           child: Row( // Wrap the text in a Row to include the "min" label
                             children: [
-                              Text(index.toString()), // Display the value
+                              Text('${index * 10}'), // Display the value
                               SizedBox(width: 4), // Add some spacing between value and label
                               Text('min'),
 // Display the label "min"
@@ -634,16 +634,15 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       updateVals();
                     },
                     items: List.generate(
-                      min(121, max((limitFade() - widget.fadeIn) + 1, 1)),
+                      min(13, max(((limitFade() - widget.fadeIn)~/10) + 1, 1)),
                           (index) {
-                        return DropdownMenuItem<int>(
-                          value: index,
-                          child: Row( // Wrap the text in a Row to include the "min" label
-                            children: [
-                              Text(index.toString()), // Display the value
-                              SizedBox(width: 4), // Add some spacing between value and label
-                              Text('min'),
-
+                            return DropdownMenuItem<int>(
+                              value: index*10,
+                              child: Row( // Wrap the text in a Row to include the "min" label
+                                children: [
+                                  Text('${index * 10}'), // Display the value
+                                  SizedBox(width: 4), // Add some spacing between value and label
+                                  Text('min'),
                               // Display the label "min"
                             ],
                           ),
@@ -698,15 +697,15 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       });
                     },
                     items: List.generate(
-                      limitTrans() + 1,
+                      (limitTrans()~/10) + 1,
                           (index) {
-                        return DropdownMenuItem<int>(
-                          value: index,
-                          child: Row( // Wrap the text in a Row to include the "min" label
-                        children: [
-                        Text(index.toString()), // Display the value
-                            SizedBox(width: 4), // Add some spacing between value and label
-                            Text('min'), // Display the label "min"
+                            return DropdownMenuItem<int>(
+                              value: index*10,
+                              child: Row( // Wrap the text in a Row to include the "min" label
+                                children: [
+                                  Text('${index * 10}'), // Display the value
+                                  SizedBox(width: 4), // Add some spacing between value and label
+                                  Text('min'),
                             ],
                             ),
                         );
@@ -764,14 +763,14 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       });
                     },
                     items: List.generate(
-                      limitDelay() + 1,
+                      (limitDelay()~/10) + 1,
                           (index) {
-                        return DropdownMenuItem<int>(
-                          value: index,
-                          child: Row(
-                            children: [
-                              Text(index.toString()),
-                              SizedBox(width: 4),
+                            return DropdownMenuItem<int>(
+                              value: index*10,
+                              child: Row( // Wrap the text in a Row to include the "min" label
+                                children: [
+                                  Text('${index * 10}'), // Display the value
+                                  SizedBox(width: 4), // Add some spacing between value and label
                               Text('sec'),
 
                             ],
@@ -833,6 +832,15 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
                       okButton,
                     ],
                   );
+                  print(widget.transitionTime);
+                  print(widget.delayTime);
+                  print(widget.fadeIn);
+                  print(widget.fadeOut);
+
+                  print(widget.transitionTimeSaved);
+                  print(widget.delayTimeSaved);
+                  print(widget.fadeInSaved);
+                  print(widget.fadeOutSaved);
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
