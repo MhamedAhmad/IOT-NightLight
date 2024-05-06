@@ -379,7 +379,7 @@ class _TimeSettingsPageState extends State<TimeSettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
           title: Text("Time Graph"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
